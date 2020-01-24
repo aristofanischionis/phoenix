@@ -13,6 +13,11 @@ module.exports = {
      * @returns {*}
      */
     navigateAndWaitTillLoaded: function (folder = '') {
+      if (this.api.globals.ocis) {
+        return navigationHelper.navigateAndWaitTillLoaded(
+          join(this.api.launchUrl, '#/files/list/home', folder),
+          this.page.FilesPageElement.filesList().elements.filesListProgressBar)
+      }
       return navigationHelper.navigateAndWaitTillLoaded(
         join(this.api.launchUrl, '#/files/list', folder),
         this.page.FilesPageElement.filesList().elements.filesListProgressBar

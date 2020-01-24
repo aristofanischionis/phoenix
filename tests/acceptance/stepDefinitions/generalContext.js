@@ -177,6 +177,9 @@ Before(function (testCase) {
 })
 
 After(async function (testCase) {
+  if (client.globals.ocis) {
+    return
+  }
   console.log('\n  Result: ' + testCase.result.status + '\n')
 
   createdFiles.forEach(fileName => fs.unlinkSync(fileName))
@@ -191,11 +194,17 @@ After(async function (testCase) {
 })
 
 Before(function () {
+  if (client.globals.ocis) {
+    return
+  }
   this.fullPathOfConfigFile = path.join(__dirname, '/../../../dist/config.json')
   initialConfigJsonSettings = getConfigJsonContent(this.fullPathOfConfigFile)
 })
 
 After(function () {
+  if (client.globals.ocis) {
+    return
+  }
   fs.writeFileSync(this.fullPathOfConfigFile,
     JSON.stringify(initialConfigJsonSettings, null, 4))
 })
