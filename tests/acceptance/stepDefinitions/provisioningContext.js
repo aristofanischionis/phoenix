@@ -15,6 +15,9 @@ function createDefaultUser (userId) {
   const password = userSettings.getPasswordForUser(userId)
   const displayname = userSettings.getDisplayNameOfDefaultUser(userId)
   const email = userSettings.getEmailAddressOfDefaultUser(userId)
+  if (client.globals.ocis) {
+    return ldap.createUser(client.globals.ldapClient, userId)
+  }
   return createUser(userId, password, displayname, email)
 }
 
@@ -112,6 +115,14 @@ function initUser (userId) {
  * @returns {*|Promise}
  */
 function createGroup (groupId) {
+  if (client.globals.ocis) {
+    return ldap.createGroup(client.globals.ldapClient, groupId)
+      .then((err) => {
+        if (!err) {
+          userSettings.addGroupToCreatedGroupsList(groupId)
+        }
+      })
+  }
   const body = new URLSearchParams()
   body.append('groupid', groupId)
   userSettings.addGroupToCreatedGroupsList(groupId)
@@ -136,6 +147,9 @@ function deleteGroup (groupId) {
 }
 
 function addToGroup (userId, groupId) {
+  if (client.globals.ocis) {
+    return ldap.addUserToGroup(client.globals.ldapClient, userId, groupId)
+  }
   const body = new URLSearchParams()
   body.append('groupid', groupId)
 
@@ -146,9 +160,6 @@ function addToGroup (userId, groupId) {
 }
 
 Given('user {string} has been created with default attributes', function (userId) {
-  if (client.globals.ocis) {
-    return ldap.createUser(client.globals.ldapClient, userId)
-  }
   return deleteUser(userId)
     .then(() => createDefaultUser(userId))
     .then(() => initUser(userId))
@@ -210,23 +221,12 @@ Given('group {string} has been created', function (groupId) {
 
 Given('these groups have been created:', function (dataTable) {
   return Promise.all(dataTable.rows().map((groupId) => {
-    if (client.globals.ocis) {
-      return ldap.createGroup(client.globals.ldapClient, groupId)
-        .then((err) => {
-          if (!err) {
-            userSettings.addGroupToCreatedGroupsList(groupId)
-          }
-        })
-    }
     return deleteGroup(groupId.toString())
       .then(() => createGroup(groupId.toString()))
   }))
 })
 
 Given('user {string} has been added to group {string}', function (userId, groupId) {
-  if (client.globals.ocis) {
-    return ldap.addUserToGroup(client.globals.ldapClient, userId, groupId)
-  }
   return addToGroup(userId, groupId)
 })
 
@@ -244,7 +244,7 @@ After(async function () {
             if (fs.existsSync(join(dataDir, 'data', user))) {
               fs.emptyDirSync(join(dataDir, 'data', user))
             }
-            console.log('deleting', createdUsers)
+            console.log('Deleting LDAP User: ', user)
           })
       }),
       ...createdGroups.map(user => {

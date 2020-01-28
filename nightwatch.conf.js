@@ -19,6 +19,8 @@ const LOCAL_UPLOAD_DIR = process.env.LOCAL_UPLOAD_DIR || '/uploads'
 const RUN_ON_OCIS = !!process.env.RUN_ON_OCIS
 const OCIS_REVA_DATA_ROOT = process.env.OCIS_REVA_DATA_ROOT || '/var/tmp/reva'
 const LDAP_SERVER_URL = process.env.LDAP_SERVER_URL || 'ldap://127.0.0.1'
+const LDAP_BASE_DN = process.env.LDAP_BASE_DN || 'cn=admin,dc=owncloud,dc=com'
+const OCIS_SKELETON_DIR = process.env.OCIS_SKELETON_DIR
 
 module.exports = {
   page_objects_path: './tests/acceptance/pageObjects',
@@ -38,7 +40,9 @@ module.exports = {
         default_backend: 'LOCAL',
         ocis: RUN_ON_OCIS,
         ldap_url: LDAP_SERVER_URL,
-        ocis_data_dir: OCIS_REVA_DATA_ROOT
+        ocis_data_dir: OCIS_REVA_DATA_ROOT,
+        ldap_base_dn: LDAP_BASE_DN,
+        ocis_skeleton_dir: OCIS_SKELETON_DIR
       },
       selenium_host: SELENIUM_HOST,
       desiredCapabilities: {

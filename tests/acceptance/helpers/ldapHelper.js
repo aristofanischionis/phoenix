@@ -8,10 +8,10 @@ const userHelper = require('./userSettings')
 exports.createClient = function (url) {
   return new Promise((resolve, reject) => {
     const ldapClient = ldap.createClient({
-      url: url || client.globals.ldap_url // 'ldap://127.0.0.1'
+      url: url || client.globals.ldap_url
     })
 
-    ldapClient.bind('cn=admin,dc=owncloud,dc=com', 'admin', err => {
+    ldapClient.bind(client.globals.ldap_base_dn, 'admin', err => {
       if (err) {
         reject(err)
       }
@@ -67,10 +67,36 @@ exports.cleanup = function (client) {
   })
 }
 
-exports.createUser = function (ldapClient, user, password = null, displayName = null, email = null) {
+exports.getNewUID = function (ldapClient) {
+  const userCn = 'ou=TestUsers,dc=owncloud,dc=com'
+  let uid = 1
+  return new Promise((resolve, reject) => {
+    ldapClient.search(
+      userCn,
+      { scope: 'sub', attributes: ['uidNumber'] },
+      (err, res) => {
+        if (err) reject(err)
+        res.on('searchEntry', function (entry) {
+          const entryId = parseInt(entry.object.uidNumber)
+          if (entryId >= uid) {
+            uid = entryId + 1
+          }
+        })
+        res.on('error', function (err) {
+          reject(err)
+        })
+        res.on('end', function (result) {
+          resolve(uid)
+        })
+      })
+  })
+}
+
+exports.createUser = async function (ldapClient, user, password = null, displayName = null, email = null) {
   password = password || userHelper.getPasswordForUser(user)
   displayName = displayName || userHelper.getDisplayNameForUser(user)
   email = email || userHelper.getEmailAddressForUser(user)
+  const uid = await exports.getNewUID(ldapClient)
   return exports.createEntry(ldapClient, `uid=${user},ou=TestUsers,dc=owncloud,dc=com`, {
     cn: user.charAt(0).toUpperCase() + user.slice(1),
     sn: user,
@@ -80,13 +106,16 @@ exports.createUser = function (ldapClient, user, password = null, displayName = 
     displayName: displayName,
     mail: email,
     gidNumber: 5000,
-    uidNumber: 1
+    uidNumber: uid
   }).then(err => {
     if (!err) {
       userHelper.addUserToCreatedUsersList(user, password, displayName, email)
-      const skelDir = process.env.OCIS_SKELETON_DIR
-      const dataDir = join(client.globals.ocis_data_dir, 'data', user, 'files')
-      return fs.copy(skelDir, dataDir)
+      const skelDir = client.globals.ocis_skeleton_dir
+      if (skelDir) {
+        const dataDir = join(client.globals.ocis_data_dir, 'data', user, 'files')
+        return fs.copy(skelDir, dataDir)
+      }
+      return
     }
     return Promise.reject(new Error('Could not create user on LDAP backend!'))
   })

@@ -184,12 +184,12 @@ module.exports = {
     } else if (userId in this.defaultUsers) {
       user = this.defaultUsers[userId]
     } else {
-      return null
+      return `${userId}@example.org`
     }
     if ('email' in user && user.email !== null) {
       return user.email
     } else {
-      return null
+      return `${userId}@example.org`
     }
   },
   /**
