@@ -5,26 +5,29 @@ const fs = require('fs-extra')
 
 const userHelper = require('./userSettings')
 
+const USERS_OU = 'ou=TestUsers,dc=owncloud,dc=com'
+const GROUPS_OU = 'ou=TestGroups,dc=owncloud,dc=com'
+
 exports.createClient = function (url) {
   return new Promise((resolve, reject) => {
     const ldapClient = ldap.createClient({
       url: url || client.globals.ldap_url
     })
 
-    ldapClient.bind(client.globals.ldap_base_dn, 'admin', err => {
+    ldapClient.bind(client.globals.ldap_base_dn, client.globals.ldap_password, err => {
       if (err) {
         reject(err)
       }
     })
 
-    ldapClient.add('ou=TestUsers,dc=owncloud,dc=com', {
+    ldapClient.add(USERS_OU, {
       objectclass: ['top', 'organizationalUnit'],
       ou: 'TestUsers'
     }, (err) => {
       if (err) {
         console.log('Users OU already exists.')
       }
-      ldapClient.add('ou=TestGroups,dc=owncloud,dc=com', {
+      ldapClient.add(GROUPS_OU, {
         objectclass: ['top', 'organizationalUnit'],
         ou: 'TestGroups'
       }, (err) => {
@@ -51,14 +54,14 @@ exports.createEntry = function (client, dn, entry) {
 
 exports.cleanup = function (client) {
   return new Promise((resolve, reject) => {
-    client.del('ou=TestGroups,dc=owncloud,dc=com', function (err) {
+    client.del(GROUPS_OU, function (err) {
       if (err) {
         reject(err)
       }
       resolve()
     })
   }).then(() => {
-    client.del('ou=TestUsers,dc=owncloud,dc=com', function (err) {
+    client.del(USERS_OU, function (err) {
       if (err) {
         Promise.reject(err)
       }
@@ -68,7 +71,7 @@ exports.cleanup = function (client) {
 }
 
 exports.getNewUID = function (ldapClient) {
-  const userCn = 'ou=TestUsers,dc=owncloud,dc=com'
+  const userCn = USERS_OU
   let uid = 1
   return new Promise((resolve, reject) => {
     ldapClient.search(
@@ -97,7 +100,7 @@ exports.createUser = async function (ldapClient, user, password = null, displayN
   displayName = displayName || userHelper.getDisplayNameForUser(user)
   email = email || userHelper.getEmailAddressForUser(user)
   const uid = await exports.getNewUID(ldapClient)
-  return exports.createEntry(ldapClient, `uid=${user},ou=TestUsers,dc=owncloud,dc=com`, {
+  return exports.createEntry(ldapClient, `uid=${user},${USERS_OU}`, {
     cn: user.charAt(0).toUpperCase() + user.slice(1),
     sn: user,
     objectclass: ['posixAccount', 'inetOrgPerson'],
@@ -130,12 +133,12 @@ exports.createGroup = function (client, group, members = []) {
   if (members.length > 0) {
     entry.memberuid = members
   }
-  return exports.createEntry(client, `cn=${group},ou=TestGroups,dc=owncloud,dc=com`, entry)
+  return exports.createEntry(client, `cn=${group},${GROUPS_OU}`, entry)
 }
 
 exports.deleteGroup = function (client, group) {
   return new Promise((resolve, reject) => {
-    client.del(`cn=${group},ou=TestGroups,dc=owncloud,dc=com`, function (err) {
+    client.del(`cn=${group},${GROUPS_OU}`, function (err) {
       if (err) {
         reject(err)
       }
@@ -146,7 +149,7 @@ exports.deleteGroup = function (client, group) {
 
 exports.deleteUser = function (client, user) {
   return new Promise((resolve, reject) => {
-    client.del(`uid=${user},ou=TestUsers,dc=owncloud,dc=com`, function (err) {
+    client.del(`uid=${user},${USERS_OU}`, function (err) {
       if (err) {
         reject(err)
       }
@@ -172,7 +175,7 @@ exports.terminate = function (ldapClient) {
 
 exports.addUserToGroup = function (client, user, group) {
   return new Promise((resolve, reject) => {
-    const groupCn = `cn=${group},ou=TestGroups,dc=owncloud,dc=com`
+    const groupCn = `cn=${group},${GROUPS_OU}`
     client.search(
       groupCn,
       { attributes: [] },
