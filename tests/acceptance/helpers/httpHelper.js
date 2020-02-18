@@ -1,6 +1,7 @@
 const userSettings = require('../helpers/userSettings')
 const _ = require('lodash')
 const fetch = require('node-fetch')
+
 /**
  *
  * @param {string} userId
@@ -42,6 +43,14 @@ exports.checkStatus = function (response, message) {
   }
 }
 
+/**
+ *
+ * @param {node-fetch.Response} response
+ * @param {string} message
+ *
+ * @throws Error
+ * @returns {node-fetch.Response}
+ */
 exports.checkOCSStatus = function (response, message) {
   const statusCode = _.get(response, 'ocs.meta.statuscode')
   if (statusCode === 200) {
@@ -51,20 +60,32 @@ exports.checkOCSStatus = function (response, message) {
   }
 }
 
-// exports.requestEndpoint = function (url, option, userId = 'admin', headers = {}) {
-//   const reqheaders = { ...headers, ...this.createOCSRequestHeaders(userId) }
-//   const options = {
-//     ...option,
-//     reqheaders
-//   }
-//   return fetch(url, options)
-// }
+/**
+ *
+ * @param {string} url
+ * @param {object} params
+ * @param {string} userId
+ * @param {object} header
+ *
+ * @returns {node-fetch}
+ */
+exports.requestWebdavEndpoint = function (url, params, userId = 'admin', header = {}) {
+  const headers = { ...this.createAuthHeader(userId), ...header }
+  const options = { ...params, headers }
+  return fetch(url, options)
+}
 
+/**
+ *
+ * @param {string} url
+ * @param {object} params
+ * @param {string} userId
+ * @param {object} header
+ *
+ * @returns {node-fetch}
+ */
 exports.requestEndpoint = function (url, params, userId = 'admin', header = {}) {
   const headers = { ...this.createOCSRequestHeaders(userId), ...header }
-  const options = {
-    ...params,
-    headers
-  }
+  const options = { ...params, headers }
   return fetch(url, options)
 }

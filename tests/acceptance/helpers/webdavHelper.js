@@ -1,5 +1,4 @@
 const { client } = require('nightwatch-api')
-const fetch = require('node-fetch')
 const httpHelper = require('../helpers/httpHelper')
 const backendHelper = require('./backendHelper')
 const convert = require('xml-js')
@@ -24,11 +23,11 @@ exports.createDavPath = function (userId, element) {
  * @param {string} file
  */
 exports.download = function (userId, file) {
-  const headers = httpHelper.createAuthHeader(userId)
   const davPath = exports.createDavPath(userId, file)
-  return fetch(
+  return httpHelper.requestWebdavEndpoint(
     davPath,
-    { method: 'GET', headers: headers }
+    { method: 'GET' },
+    userId
   )
     .then(res => httpHelper.checkStatus(res, 'Could not download file.'))
     .then(res => res.text())
@@ -40,11 +39,11 @@ exports.download = function (userId, file) {
  * @param {string} file
  */
 exports.delete = function (userId, file) {
-  const headers = httpHelper.createAuthHeader(userId)
   const davPath = exports.createDavPath(userId, file)
-  return fetch(
+  return httpHelper.requestWebdavEndpoint(
     davPath,
-    { method: 'DELETE', headers: headers }
+    { method: 'DELETE' },
+    userId
   )
     .then(res => httpHelper.checkStatus(res, 'Could not delete file ' + file))
     .then(res => res.text())
@@ -58,12 +57,12 @@ exports.delete = function (userId, file) {
  * @param {string} toName
  */
 exports.move = function (userId, fromName, toName) {
-  const headers = httpHelper.createAuthHeader(userId)
-  headers.Destination = exports.createDavPath(userId, toName)
   const davPath = exports.createDavPath(userId, fromName)
-  return fetch(
+  return httpHelper.requestWebdavEndpoint(
     davPath,
-    { method: 'MOVE', headers: headers }
+    { method: 'MOVE' },
+    userId,
+    { Destination: exports.createDavPath(userId, toName) }
   )
     .then(res => httpHelper.checkStatus(res, 'Could not move file.'))
     .then(res => res.text())
@@ -77,8 +76,6 @@ exports.move = function (userId, fromName, toName) {
  * @param {number} folderDepth
  */
 exports.propfind = function (path, userId, properties, folderDepth = 1) {
-  const headers = httpHelper.createAuthHeader(userId)
-  headers.Depth = folderDepth
   const davPath = join(backendHelper.getCurrentBackendUrl(), '/remote.php/dav', path)
   let propertyBody = ''
   properties.map(prop => {
@@ -91,9 +88,11 @@ exports.propfind = function (path, userId, properties, folderDepth = 1) {
                 xmlns:ocs="http://open-collaboration-services.org/ns">
                 <d:prop>${propertyBody}</d:prop>
                 </d:propfind>`
-  return fetch(
+  return httpHelper.requestWebdavEndpoint(
     davPath,
-    { method: 'PROPFIND', headers, body }
+    { method: 'PROPFIND', body },
+    userId,
+    { Depth: folderDepth }
   )
     .then(res => res.text())
 }
@@ -143,11 +142,11 @@ exports.getTrashBinElements = function (user, depth = 2) {
  * @param {string} folderName
  */
 exports.createFolder = function (user, folderName) {
-  const headers = httpHelper.createAuthHeader(user)
   const davPath = exports.createDavPath(user, folderName)
-  return fetch(
+  return httpHelper.requestWebdavEndpoint(
     davPath,
-    { method: 'MKCOL', headers: headers }
+    { method: 'MKCOL' },
+    user
   )
     .then(res => httpHelper.checkStatus(res, `Could not create the folder "${folderName}" for user "${user}".`))
     .then(res => res.text())
@@ -160,11 +159,11 @@ exports.createFolder = function (user, folderName) {
  * @param {string} contents
  */
 exports.createFile = function (user, fileName, contents = '') {
-  const headers = httpHelper.createAuthHeader(user)
   const davPath = exports.createDavPath(user, fileName)
-  return fetch(
+  return httpHelper.requestWebdavEndpoint(
     davPath,
-    { method: 'PUT', headers: headers, body: contents }
+    { method: 'PUT', body: contents },
+    user
   )
     .then(res => httpHelper.checkStatus(res, `Could not create the file "${fileName}" for user "${user}".`))
     .then(res => res.text())
@@ -206,14 +205,13 @@ exports.getSkeletonFile = function (filename) {
   return occHelper.runOcc(['config:system:get', 'skeletondirectory'])
     .then(resp => resp.ocs.data.stdOut)
     .then(dir => {
-      const headers = httpHelper.createAuthHeader('admin')
       const element = join(dir.trim(), filename)
       const apiURL = join(client.globals.backend_url,
         '/ocs/v2.php/apps/testing/api/v1/file',
         `?file=${encodeURIComponent(element)}&absolute=true&format=json`
       )
-      return fetch(apiURL,
-        { method: 'GET', headers })
+      return httpHelper.requestWebdavEndpoint(apiURL,
+        { method: 'GET' })
     })
     .then(res => res.json())
     .then(body => {
@@ -222,34 +220,31 @@ exports.getSkeletonFile = function (filename) {
 }
 
 exports.uploadFileWithContent = function (user, content, filename) {
-  const headers = httpHelper.createAuthHeader(user)
   const apiURL = join(backendHelper.getCurrentBackendUrl(), '/remote.php/webdav/', filename)
-  return fetch(apiURL,
+  return httpHelper.requestWebdavEndpoint(apiURL,
     {
-      headers: {
-        'Content-Type': 'text/plain',
-        ...headers
-      },
       method: 'PUT',
       body: content
-    })
+    },
+    user,
+    { 'Content-Type': 'text/plain' }
+  )
     .then(res => httpHelper.checkStatus(res, 'Could not upload file' + filename + 'with content' + content))
 }
 
 exports.getFavouritedResources = function (user) {
-  const headers = httpHelper.createAuthHeader(user)
   const body = `<oc:filter-files  xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns">
                  <d:prop><d:resourcetype /></d:prop>
                  <oc:filter-rules>
                      <oc:favorite>1</oc:favorite>
                  </oc:filter-rules>
                 </oc:filter-files>`
-  return fetch(client.globals.backend_url + `/remote.php/dav/files/${user}`,
+  return httpHelper.requestWebdavEndpoint(client.globals.backend_url + `/remote.php/dav/files/${user}`,
     {
       method: 'REPORT',
-      headers,
       body
-    })
+    },
+    user)
     .then(res => res.text())
     .then(res => {
       const favData = convert.xml2js(res, { compact: true })['d:multistatus']['d:response']

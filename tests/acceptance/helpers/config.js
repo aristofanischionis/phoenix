@@ -12,9 +12,6 @@ const config = {}
 
 async function setSkeletonDirectory (server, admin) {
   const data = JSON.stringify({ directory: 'webUISkeleton' })
-  const headers = {
-    'Content-Type': 'application/json'
-  }
   const apiUrl = join(
     server,
     '/ocs/v2.php/apps/testing',
@@ -25,7 +22,7 @@ async function setSkeletonDirectory (server, admin) {
     apiUrl,
     { method: 'POST', body: data },
     'admin',
-    headers
+    { 'Content-Type': 'application/json' }
   )
 
   httpHelper.checkStatus(resp, 'Could not set skeletondirectory.')
