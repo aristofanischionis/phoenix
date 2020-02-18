@@ -1,5 +1,6 @@
 const userSettings = require('../helpers/userSettings')
 const _ = require('lodash')
+const fetch = require('node-fetch')
 /**
  *
  * @param {string} userId
@@ -48,4 +49,22 @@ exports.checkOCSStatus = function (response, message) {
   } else {
     throw Error(message + ' Status:' + statusCode)
   }
+}
+
+// exports.requestEndpoint = function (url, option, userId = 'admin', headers = {}) {
+//   const reqheaders = { ...headers, ...this.createOCSRequestHeaders(userId) }
+//   const options = {
+//     ...option,
+//     reqheaders
+//   }
+//   return fetch(url, options)
+// }
+
+exports.requestEndpoint = function (url, params, userId = 'admin') {
+  const headers = this.createOCSRequestHeaders(userId)
+  const options = {
+    ...params,
+    headers
+  }
+  return fetch(url, options)
 }

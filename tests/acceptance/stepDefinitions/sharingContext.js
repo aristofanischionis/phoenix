@@ -1,6 +1,5 @@
 const { client } = require('nightwatch-api')
 const { When, Given, Then } = require('cucumber')
-const fetch = require('node-fetch')
 const assert = require('assert')
 const { URLSearchParams } = require('url')
 require('url-search-params-polyfill')
@@ -115,12 +114,13 @@ const shareFileFolder = function (
     }
   }
 
-  return fetch(
+  return httpHelper.requestEndpoint(
     path.join(
       backendHelper.getCurrentBackendUrl(),
       '/ocs/v2.php/apps/files_sharing/api/v1/shares?format=json'
     ),
-    { method: 'POST', headers: httpHelper.createOCSRequestHeaders(sharer), body: params }
+    { method: 'POST', body: params },
+    sharer
   )
     .then(res => res.json())
     .then(function (json) {
