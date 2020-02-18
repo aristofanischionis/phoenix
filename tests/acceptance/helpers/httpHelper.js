@@ -60,8 +60,8 @@ exports.checkOCSStatus = function (response, message) {
 //   return fetch(url, options)
 // }
 
-exports.requestEndpoint = function (url, params, userId = 'admin') {
-  const headers = this.createOCSRequestHeaders(userId)
+exports.requestEndpoint = function (url, params, userId = 'admin', header = {}) {
+  const headers = { ...this.createOCSRequestHeaders(userId), ...header }
   const options = {
     ...params,
     headers

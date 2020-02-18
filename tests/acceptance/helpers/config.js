@@ -1,4 +1,3 @@
-const fetch = require('node-fetch')
 const httpHelper = require('./httpHelper')
 const occHelper = require('./occHelper')
 const { join } = require('./path')
@@ -14,7 +13,6 @@ const config = {}
 async function setSkeletonDirectory (server, admin) {
   const data = JSON.stringify({ directory: 'webUISkeleton' })
   const headers = {
-    ...httpHelper.createOCSRequestHeaders(admin),
     'Content-Type': 'application/json'
   }
   const apiUrl = join(
@@ -23,9 +21,11 @@ async function setSkeletonDirectory (server, admin) {
     '/api/v1/testingskeletondirectory?format=json'
   )
 
-  const resp = await fetch(
+  const resp = await httpHelper.requestEndpoint(
     apiUrl,
-    { method: 'POST', headers, body: data }
+    { method: 'POST', body: data },
+    'admin',
+    headers
   )
 
   httpHelper.checkStatus(resp, 'Could not set skeletondirectory.')

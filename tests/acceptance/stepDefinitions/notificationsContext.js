@@ -2,7 +2,6 @@ const { client } = require('nightwatch-api')
 const { Given, When, Then } = require('cucumber')
 const httpHelper = require('../helpers/httpHelper')
 const codify = require('../helpers/codify')
-const fetch = require('node-fetch')
 const assert = require('assert')
 const util = require('util')
 const { join } = require('../helpers/path')
@@ -12,8 +11,8 @@ When('user {string} is sent a notification', function (user) {
   body.append('user', user)
   const apiURL = join(client.globals.backend_url, '/ocs/v2.php/apps/testing/api/v1/notifications')
 
-  return fetch(apiURL,
-    { method: 'POST', headers: httpHelper.createOCSRequestHeaders(user), body: body }
+  return httpHelper.requestEndpoint(apiURL,
+    { method: 'POST', body: body }
   )
     .then(res => httpHelper.checkStatus(res, 'Could not generate notification.'))
 })
@@ -35,7 +34,6 @@ Given('app {string} has been {}', function (app, action) {
     action === 'enabled' || action === 'disabled',
     "only supported either 'enabled' or 'disabled'. Passed: " + action
   )
-  const headers = httpHelper.createOCSRequestHeaders('admin')
   const method = action === 'enabled' ? 'POST' : 'DELETE'
 
   const errorMessage = util.format(
@@ -43,8 +41,7 @@ Given('app {string} has been {}', function (app, action) {
     action === 'enabled' ? 'enable' : 'disable'
   )
   const apiURL = join(client.globals.backend_url, '/ocs/v2.php/cloud/apps/', app, '?format=json')
-  return fetch(apiURL, {
-    headers,
+  return httpHelper.requestEndpoint(apiURL, {
     method
   }).then(res => {
     httpHelper.checkStatus(res, errorMessage)
