@@ -5,13 +5,13 @@ module.exports = {
   elements: {
     body: 'body',
     usernameInput: {
-      selector: 'input[name="username"]'
+      selector: 'input[autocomplete="kopano-account username"]'
     },
     passwordInput: {
-      selector: 'input[name="password"]'
+      selector: 'input[autocomplete="kopano-account current-password"]'
     },
     loginSubmitButton: {
-      selector: 'input[type="submit"]'
+      selector: 'button[type="submit"]'
     },
     invalidCredentialsMessage: {
       selector: '#lost-password'

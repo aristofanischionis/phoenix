@@ -103,16 +103,10 @@ After(function rollbackConfigsOnLocal () {
 })
 
 After(function stopDriverIfOnLocal () {
-  if (client.globals.ocis) {
-    return
-  }
   return RUNNING_ON_CI || stopWebDriver()
 })
 
 After(function closeSessionForEnv () {
-  if (client.globals.ocis) {
-    return
-  }
   return closeSession()
 })
 

@@ -52,7 +52,7 @@ module.exports = {
         javascriptEnabled: true,
         acceptSslCerts: true,
         chromeOptions: {
-          args: ['disable-gpu'],
+          args: ['disable-gpu', 'ignore-certificate-errors'],
           w3c: false
         },
         loggingPrefs: { browser: 'ALL' }
