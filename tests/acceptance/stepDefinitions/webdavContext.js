@@ -17,11 +17,7 @@ const path = require('../helpers/path')
  */
 function fileExists (userId, element) {
   const davPath = webdavHelper.createDavPath(userId, element)
-  return httpHelper.requestWebdavEndpoint(
-    davPath,
-    { method: 'GET' },
-    userId
-  )
+  return httpHelper.getWebdav(davPath, {}, userId)
 }
 
 const fileShouldExist = function (userId, element) {
@@ -110,9 +106,9 @@ Given('user {string} has favorited element {string}', function (userId, element)
     '  </d:set>\n' +
     '</d:propertyupdate>'
 
-  return httpHelper.requestWebdavEndpoint(
+  return httpHelper.propPatchWebdav(
     webdavHelper.createDavPath(userId, element),
-    { method: 'PROPPATCH', body: body },
+    { body },
     userId
   )
     .then(function (res) {

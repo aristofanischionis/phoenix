@@ -11,14 +11,12 @@ exports.runOcc = function (args) {
   const params = new URLSearchParams()
   params.append('command', args.join(' '))
   const apiURL = join(backendHelper.getCurrentBackendUrl(), '/ocs/v2.php/apps/testing/api/v1/occ?format=json')
-  return httpHelper.requestEndpoint(apiURL, {
-    body: params,
-    method: 'POST'
-  }).then(res => {
-    httpHelper.checkStatus(res, 'Failed while executing occ command')
-    return res.json()
-  }).then(res => {
-    httpHelper.checkOCSStatus(res, 'Failed while executing occ command')
-    return res
-  })
+  return httpHelper.post(apiURL, { body: params })
+    .then(res => {
+      httpHelper.checkStatus(res, 'Failed while executing occ command')
+      return res.json()
+    }).then(res => {
+      httpHelper.checkOCSStatus(res, 'Failed while executing occ command')
+      return res
+    })
 }

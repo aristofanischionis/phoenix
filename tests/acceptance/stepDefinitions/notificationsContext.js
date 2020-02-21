@@ -11,9 +11,7 @@ When('user {string} is sent a notification', function (user) {
   body.append('user', user)
   const apiURL = join(client.globals.backend_url, '/ocs/v2.php/apps/testing/api/v1/notifications')
 
-  return httpHelper.requestEndpoint(apiURL,
-    { method: 'POST', body: body }
-  )
+  return httpHelper.post(apiURL, { body })
     .then(res => httpHelper.checkStatus(res, 'Could not generate notification.'))
 })
 
@@ -29,21 +27,19 @@ When('the user declines all shares displayed in the notifications on the webUI',
   return client.page.phoenixPage().declineAllSharesInNotification()
 })
 
-Given('app {string} has been {}', function (app, action) {
+Given('app {string} has been {}', async function (app, action) {
   assert.ok(
     action === 'enabled' || action === 'disabled',
     "only supported either 'enabled' or 'disabled'. Passed: " + action
   )
-  const method = action === 'enabled' ? 'POST' : 'DELETE'
 
   const errorMessage = util.format(
     'Failed while trying to %s the app',
     action === 'enabled' ? 'enable' : 'disable'
   )
   const apiURL = join(client.globals.backend_url, '/ocs/v2.php/cloud/apps/', app, '?format=json')
-  return httpHelper.requestEndpoint(apiURL, {
-    method
-  }).then(res => {
+  const response = await action === 'enabled' ? httpHelper.post(apiURL) : httpHelper.delete(apiURL)
+  response.then(res => {
     httpHelper.checkStatus(res, errorMessage)
     return res.json()
   }).then(data => {

@@ -113,15 +113,11 @@ const shareFileFolder = function (
       params.append(key, extraParams[key])
     }
   }
-
-  return httpHelper.requestEndpoint(
-    path.join(
-      backendHelper.getCurrentBackendUrl(),
-      '/ocs/v2.php/apps/files_sharing/api/v1/shares?format=json'
-    ),
-    { method: 'POST', body: params },
-    sharer
+  const url = path.join(
+    backendHelper.getCurrentBackendUrl(),
+    '/ocs/v2.php/apps/files_sharing/api/v1/shares?format=json'
   )
+  return httpHelper.post(url, { body: params }, sharer)
     .then(res => res.json())
     .then(function (json) {
       httpHelper.checkOCSStatus(json, 'Could not create share. Message: ' + json.ocs.meta.message)

@@ -88,7 +88,7 @@ module.exports = {
     const apiURL = new URL(join(client.globals.backend_url, '/ocs/v2.php/apps/files_sharing/api/v1/shares'))
     apiURL.search = new URLSearchParams({ format: 'json', ...filters }).toString()
 
-    return httpHelper.requestEndpoint(apiURL, { method: 'GET' }, user)
+    return httpHelper.get(apiURL, {}, user)
       .then(res => res.json())
       .then(function (sharesResult) {
         httpHelper.checkOCSStatus(sharesResult, 'Could not get shares. Message: ' + sharesResult.ocs.meta.message)
@@ -132,10 +132,7 @@ module.exports = {
     const apiURL = join(client.globals.backend_url, '/ocs/v2.php/apps/files_sharing/api/v1/shares?format=json')
     let lastShareToken
     let lastShare
-    await httpHelper.requestEndpoint(apiURL, {
-      method: 'GET'
-    },
-    linkCreator)
+    await httpHelper.get(apiURL, {}, linkCreator)
       .then(res => res.json())
       .then(function (sharesResult) {
         httpHelper.checkOCSStatus(sharesResult, 'Could not get shares. Message: ' + sharesResult.ocs.meta.message)
@@ -163,9 +160,7 @@ module.exports = {
   getAllPublicLinkShares: async function (sharer) {
     const data = []
     const apiURL = join(client.globals.backend_url, '/ocs/v2.php/apps/files_sharing/api/v1/shares?&format=json')
-    const response = await httpHelper.requestEndpoint(apiURL, {
-      method: 'GET'
-    }, sharer)
+    const response = await httpHelper.get(apiURL, {}, sharer)
     const jsonResponse = await response.json()
     httpHelper.checkOCSStatus(jsonResponse, 'Could not get shares. Message: ' + jsonResponse.ocs.meta.message)
     for (const share of jsonResponse.ocs.data) {
@@ -190,10 +185,7 @@ module.exports = {
     params.set('state', 'all')
     const apiURL = join(client.globals.backend_url,
       '/ocs/v2.php/apps/files_sharing/api/v1/shares', `?${params.toString()}`)
-    return httpHelper.requestEndpoint(apiURL,
-      {
-        method: 'GET'
-      }, user)
+    return httpHelper.get(apiURL, {}, user)
       .then(res => {
         httpHelper.checkStatus(res, 'The response status is not the expected value')
         return res.json()
@@ -234,10 +226,7 @@ module.exports = {
         shareID,
         '?format=json'
       )
-      return httpHelper.requestEndpoint(apiURL,
-        {
-          method: 'DELETE'
-        }, user)
+      return httpHelper.delete(apiURL, {}, user)
         .then(res => {
           res = httpHelper.checkStatus(res, 'The response status is not the expected value')
           return res.json()
@@ -272,10 +261,7 @@ module.exports = {
         shareID,
         '?format=json'
       )
-      return httpHelper.requestEndpoint(apiURL,
-        {
-          method: 'POST'
-        }, user)
+      return httpHelper.post(apiURL, {}, user)
         .then(res => {
           res = httpHelper.checkStatus(res, 'The response status is not the expected value')
           return res.json()

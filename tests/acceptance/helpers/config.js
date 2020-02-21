@@ -18,9 +18,9 @@ async function setSkeletonDirectory (server, admin) {
     '/api/v1/testingskeletondirectory?format=json'
   )
 
-  const resp = await httpHelper.requestEndpoint(
+  const resp = await httpHelper.post(
     apiUrl,
-    { method: 'POST', body: data },
+    { body: data },
     'admin',
     { 'Content-Type': 'application/json' }
   )

@@ -140,8 +140,7 @@ const setTrustedServer = function (url) {
   const body = new URLSearchParams()
   body.append('url', url)
   const postUrl = join(backendHelper.getCurrentBackendUrl(), '/ocs/v2.php/apps/testing/api/v1/trustedservers?format=json')
-  return httpHelper.requestEndpoint(postUrl,
-    { method: 'POST', body })
+  return httpHelper.post(postUrl, { body })
     .then(res => {
       return httpHelper.checkStatus(res)
     })
@@ -182,9 +181,8 @@ After(async function (testCase) {
   // clear file locks
   const body = new URLSearchParams()
   body.append('global', 'true')
-  await httpHelper.requestEndpoint(join(client.globals.backend_url, '/ocs/v2.php/apps/testing/api/v1/lockprovisioning'),
-    { method: 'DELETE', body: body }
-  )
+  const url = join(client.globals.backend_url, '/ocs/v2.php/apps/testing/api/v1/lockprovisioning')
+  await httpHelper.delete(url, { body })
 })
 
 Before(function () {
