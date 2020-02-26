@@ -80,10 +80,11 @@ config = {
 			},
 			'extraEnvironment': {
 				'SERVER_HOST': 'http://ocis:9100',
-				'BACKEND_HOST': 'http://ocis:9140',
+				'BACKEND_HOST': 'http://reva:9140',
 				'RUN_ON_OCIS': 'true',
 				'OCIS_SKELETON_DIR': '/var/www/owncloud/server/apps/testing/data/webUISkeleton',
-				'OCIS_REVA_DATA_ROOT': '/srv/tmp/reva/'
+				'OCIS_REVA_DATA_ROOT': '/srv/tmp/reva/',
+				'LDAP_SERVER_URL': 'ldap://ldap'
 			},
 			'runningOnOCIS': True,
 		}
@@ -385,15 +386,15 @@ def acceptance():
 								copyFilesForUpload() +
 								runWebuiAcceptanceTests(suite, alternateSuiteName, params['filterTags'], params['extraEnvironment'], browser, params['runningOnOCIS']),
 							'services':
-								phoenixService() +
+								databaseService(db) +
 								(
+									phoenixService() +
 									owncloudService() +
 									(
 										owncloudFederatedService() +
 										databaseServiceForFederation(db, federationDbSuffix)
 										if params['federatedServerNeeded'] else []
-									) +
-									databaseService(db) if not params['runningOnOCIS'] else (
+									) if not params['runningOnOCIS'] else (
 										revaService() +
 										ocisServices() +
 										ocisTestServices() +
@@ -896,6 +897,14 @@ def konnectdService():
 			'KONNECTD_CONFIG_FILE': '/srv/config/identifier-registration.yml'
 		},
 		'commands': [
+			'mkdir -p /srv/app',
+			'mkdir -p /srv/app/src',
+			'cd $GOPATH/src',
+			'mkdir -p github.com/owncloud/',
+			'cd github.com/owncloud/',
+			'git clone http://github.com/owncloud/ocis-konnectd',
+			'cd ocis-konnectd',
+			'make build',
 			'bin/ocis-konnectd server --iss https://konnectd:9130'
 		],
 		'volumes': [{
@@ -917,8 +926,16 @@ def ocisServices():
 			'PHOENIX_WEB_CONFIG': '/srv/config/ocis-config.json',
 		},
 		'commands': [
-			'ocis/bin/ocis phoenix &',
-			'ocis/bin/ocis devldap &'
+			'mkdir -p /srv/app',
+			'mkdir -p /srv/app/src',
+			'cd $GOPATH/src',
+			'mkdir -p github.com/owncloud/',
+			'cd github.com/owncloud/',
+			'git clone http://github.com/owncloud/ocis',
+			'cd ocis',
+			'make build',
+			'bin/ocis devldap &',
+			'bin/ocis phoenix'
 		],
 		'volumes': [{
 			'name': 'gopath',
@@ -931,7 +948,7 @@ def ocisServices():
 
 def revaService():
 	return[{
-		'name': 'reva-server',
+		'name': 'reva',
 		'image': 'webhippie/golang:1.13',
 		'pull': 'always',
 		'detach': True,
@@ -945,6 +962,13 @@ def revaService():
 		},
 		'commands': [
 			'mkdir -p /srv/app/tmp/reva',
+			'mkdir -p /srv/app/src',
+			'cd $GOPATH/src',
+			'mkdir -p github.com/owncloud/',
+			'cd github.com/owncloud/',
+			'git clone http://github.com/owncloud/ocis-reva',
+			'cd ocis-reva',
+			'make build',
 			'bin/ocis-reva gateway &',
 			'bin/ocis-reva users &',
 			'bin/ocis-reva auth-basic &',
@@ -1093,7 +1117,7 @@ def runWebuiAcceptanceTests(suite, alternateSuiteName, filterTags, extraEnvironm
 		'commands': [
 			'cd /var/www/owncloud/phoenix',
 			'cp -r /var/www/owncloud/phoenix/tests/drone /srv/config',
-			'curl http://phoenix/oidc-callback.html',
+			'curl http://phoenix/oidc-callback.html' if not runningOnOCIS else 'curl http://ocis:9100/oidc-callback.html',
 			'yarn run acceptance-tests-drone',
 		],
 		'volumes': [{

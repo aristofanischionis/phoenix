@@ -1,5 +1,5 @@
 {
-  "server": "http://ocis:9140",
+  "server": "http://reva:9140",
   "theme": "owncloud",
   "version": "0.1.0",
   "openIdConnect": {
