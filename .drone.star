@@ -79,8 +79,8 @@ config = {
 				'all': 'webUIOCIS',
 			},
 			'extraEnvironment': {
-				'SERVER_HOST': 'http://phoenix',
-				'BACKEND_HOST': 'http://ocis',
+				'SERVER_HOST': 'http://ocis:9100',
+				'BACKEND_HOST': 'http://ocis:9140',
 				'RUN_ON_OCIS': 'true',
 				'OCIS_SKELETON_DIR': '/var/www/owncloud/server/apps/testing/data/webUISkeleton',
 				'OCIS_REVA_DATA_ROOT': '/srv/tmp/reva/'
@@ -380,7 +380,7 @@ def acceptance():
 											fixPermissionsFederated() +
 											owncloudLogFederated() if params['federatedServerNeeded'] else []
 										)
-									 ) if params['runningOnOCIS'] else []
+									 ) if not params['runningOnOCIS'] else []
 								) +
 								copyFilesForUpload() +
 								runWebuiAcceptanceTests(suite, alternateSuiteName, params['filterTags'], params['extraEnvironment'], browser, params['runningOnOCIS']),
@@ -909,7 +909,7 @@ def konnectdService():
 
 def ocisServices():
 	return[{
-		'name': 'ocis-services',
+		'name': 'ocis',
 		'image': 'webhippie/golang:1.13',
 		'pull': 'always',
 		'detach': True,
