@@ -1,3 +1,4 @@
+@skipOnOCIS
 Feature: Autocompletion of share-with names
   As a user
   I want to share files, with minimal typing, to the right people or groups

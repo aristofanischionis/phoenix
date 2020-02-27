@@ -1,3 +1,4 @@
+@skipOnOCIS
 Feature: Sharing folders with internal groups with different roles and permissions
   As a user
   I want to set different permissions on shared folders with groups

@@ -249,6 +249,9 @@ After(async function () {
       }),
       ...createdGroups.map(user => {
         return ldap.deleteGroup(client.globals.ldapClient, user)
+          .catch(err => {
+            console.log(err)
+          })
       })
     ])
   } else {

@@ -1,4 +1,4 @@
-@app-required @notifications-app-required
+@app-required @notifications-app-required @skipOnOCIS
 Feature: Sharing files and folders with internal users
   As a user
   I want to share files and folders with other users
