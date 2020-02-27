@@ -84,7 +84,7 @@ config = {
 				'RUN_ON_OCIS': 'true',
 				'OCIS_SKELETON_DIR': '/var/www/owncloud/server/apps/testing/data/webUISkeleton',
 				'OCIS_REVA_DATA_ROOT': '/srv/tmp/reva/',
-				'LDAP_SERVER_URL': 'ldap://ldap'
+				'LDAP_SERVER_URL': 'ldap://ldap',
 			},
 			'runningOnOCIS': True,
 			'filterTags': '@issue-1910 and not @skipOnOCIS',
@@ -110,7 +110,8 @@ def main(ctx):
 	return before + stages + after
 
 def beforePipelines(ctx):
-	return yarnlint() + changelog(ctx)
+	# return yarnlint() + changelog(ctx)
+	return []
 
 def stagePipelines(ctx):
 	acceptancePipelines = acceptance()
@@ -382,7 +383,14 @@ def acceptance():
 											fixPermissionsFederated() +
 											owncloudLogFederated() if params['federatedServerNeeded'] else []
 										)
-									 ) if not params['runningOnOCIS'] else []
+									) if not params['runningOnOCIS'] else (
+										buildKonnectd() +
+										buildOcis() +
+										buildReva() +
+										konnectdService() +
+										revaService() +
+										ocisServices()
+									)
 								) +
 								copyFilesForUpload() +
 								runWebuiAcceptanceTests(suite, alternateSuiteName, params['filterTags'], params['extraEnvironment'], browser, params['runningOnOCIS']),
@@ -395,12 +403,7 @@ def acceptance():
 										owncloudFederatedService() +
 										databaseServiceForFederation(db, federationDbSuffix)
 										if params['federatedServerNeeded'] else []
-									) if not params['runningOnOCIS'] else (
-										revaService() +
-										ocisServices() +
-										ocisTestServices() +
-										konnectdService()
-									)
+									) if not params['runningOnOCIS'] else ocisTestServices()
 								) +
 								browserService(alternateSuiteName, browser),
 							'depends_on': [],
@@ -414,6 +417,9 @@ def acceptance():
 							},
 							'volumes': [{
 								'name': 'uploads',
+								'temp': {}
+							}, {
+								'name': 'configs',
 								'temp': {}
 							}]
 						}
@@ -761,8 +767,14 @@ def buildPhoenix():
 		'pull': 'always',
 		'commands': [
 			'yarn dist',
-			'cp tests/drone/config.json dist/config.json'
-		]
+			'cp tests/drone/config.json dist/config.json',
+			'mkdir -p /srv/config',
+			'cp -r /var/www/owncloud/phoenix/tests/drone /srv/config',
+		],
+		'volumes': [{
+			'name': 'configs',
+			'path': '/srv/config'
+		}],
 	}]
 
 def buildDockerImage():
@@ -885,6 +897,31 @@ def cloneOauth():
 		]
 	}]
 
+def buildKonnectd():
+	return[{
+		'name': 'build-konnectd',
+		'image': 'webhippie/golang:1.13',
+		'pull': 'always',
+		'commands': [
+			'mkdir -p /srv/app',
+			'mkdir -p /srv/app/src',
+			'cd $GOPATH/src',
+			'mkdir -p github.com/owncloud/',
+			'cd github.com/owncloud/',
+			'git clone http://github.com/owncloud/ocis-konnectd',
+			'cd ocis-konnectd',
+			'make build',
+			'cp bin/ocis-konnectd /var/www/owncloud'
+		],
+		'volumes': [{
+			'name': 'gopath',
+			'path': '/srv/app',
+		}, {
+			'name': 'configs',
+			'path': '/srv/config'
+		}],
+	}]
+
 def konnectdService():
 	return[{
 		'name': 'konnectd',
@@ -895,18 +932,40 @@ def konnectdService():
 			'LDAP_BASEDN': 'ou=TestUsers,dc=owncloud,dc=com',
 			'LDAP_BINDDN': 'cn=admin,dc=owncloud,dc=com',
 			'LDAP_URI': 'ldap://ldap:389',
-			'KONNECTD_CONFIG_FILE': '/srv/config/identifier-registration.yml'
+			'KONNECTD_IDENTIFIER_REGISTRATION_CONF': '/srv/config/drone/identifier-registration.yml',
+			'KONNECTD_ISS': 'https://konnectd:9130',
 		},
+		'commands': [
+			'ls -la /var/www/owncloud',
+			'cd /var/www/owncloud',
+			'ls -la',
+			'ls -la /srv/config/drone',
+			'./ocis-konnectd server'
+		],
+		'volumes': [{
+			'name': 'gopath',
+			'path': '/srv/app',
+		}, {
+			'name': 'configs',
+			'path': '/srv/config'
+		}],
+	}]
+
+def buildOcis():
+	return[{
+		'name': 'build-ocis',
+		'image': 'webhippie/golang:1.13',
+		'pull': 'always',
 		'commands': [
 			'mkdir -p /srv/app',
 			'mkdir -p /srv/app/src',
 			'cd $GOPATH/src',
 			'mkdir -p github.com/owncloud/',
 			'cd github.com/owncloud/',
-			'git clone http://github.com/owncloud/ocis-konnectd',
-			'cd ocis-konnectd',
+			'git clone http://github.com/owncloud/ocis',
+			'cd ocis',
 			'make build',
-			'bin/ocis-konnectd server --iss https://konnectd:9130'
+			'cp bin/ocis /var/www/owncloud'
 		],
 		'volumes': [{
 			'name': 'gopath',
@@ -924,19 +983,38 @@ def ocisServices():
 		'pull': 'always',
 		'detach': True,
 		'environment' : {
-			'PHOENIX_WEB_CONFIG': '/srv/config/ocis-config.json',
+			'PHOENIX_WEB_CONFIG': '/srv/config/drone/ocis-config.json',
+			'PHOENIX_ASSET_PATH': '/var/www/owncloud/phoenix/dist'
 		},
+		'commands': [
+			'cd /var/www/owncloud',
+			'./ocis devldap &',
+			'./ocis phoenix'
+		],
+		'volumes': [{
+			'name': 'gopath',
+			'path': '/srv/app',
+		}, {
+			'name': 'configs',
+			'path': '/srv/config'
+		}],
+	}]
+
+def buildReva():
+	return[{
+		'name': 'build-reva',
+		'image': 'webhippie/golang:1.13',
+		'pull': 'always',
 		'commands': [
 			'mkdir -p /srv/app',
 			'mkdir -p /srv/app/src',
 			'cd $GOPATH/src',
 			'mkdir -p github.com/owncloud/',
 			'cd github.com/owncloud/',
-			'git clone http://github.com/owncloud/ocis',
-			'cd ocis',
+			'git clone http://github.com/owncloud/ocis-reva',
+			'cd ocis-reva',
 			'make build',
-			'bin/ocis devldap &',
-			'bin/ocis phoenix'
+			'cp bin/ocis-reva /var/www/owncloud'
 		],
 		'volumes': [{
 			'name': 'gopath',
@@ -962,25 +1040,18 @@ def revaService():
 			'REVA_OIDC_ISSUER': 'https://konnectd:9130',
 		},
 		'commands': [
-			'mkdir -p /srv/app/tmp/reva',
-			'mkdir -p /srv/app/src',
-			'cd $GOPATH/src',
-			'mkdir -p github.com/owncloud/',
-			'cd github.com/owncloud/',
-			'git clone http://github.com/owncloud/ocis-reva',
-			'cd ocis-reva',
-			'make build',
-			'bin/ocis-reva gateway &',
-			'bin/ocis-reva users &',
-			'bin/ocis-reva auth-basic &',
-			'bin/ocis-reva auth-bearer &',
-			'bin/ocis-reva sharing &',
-			'bin/ocis-reva storage-root &',
-			'bin/ocis-reva storage-home &',
-			'bin/ocis-reva storage-home-data &',
-			'bin/ocis-reva storage-oc &',
-			'bin/ocis-reva storage-oc-data &',
-			'bin/ocis-reva frontend'
+			'cd /var/www/owncloud',
+			'./ocis-reva gateway &',
+			'./ocis-reva users &',
+			'./ocis-reva auth-basic &',
+			'./ocis-reva auth-bearer &',
+			'./ocis-reva sharing &',
+			'./ocis-reva storage-root &',
+			'./ocis-reva storage-home &',
+			'./ocis-reva storage-home-data &',
+			'./ocis-reva storage-oc &',
+			'./ocis-reva storage-oc-data &',
+			'./ocis-reva frontend',
 		],
 		'volumes': [{
 			'name': 'gopath',
@@ -1109,7 +1180,7 @@ def runWebuiAcceptanceTests(suite, alternateSuiteName, filterTags, extraEnvironm
 		}
 
 	environment['SERVER_HOST'] = 'http://phoenix' if not runningOnOCIS else 'http://ocis:9100'
-	environment['BACKEND_HOST'] = 'http://owncloud' if not runningOnOCIS else 'http://ocis:9140'
+	environment['BACKEND_HOST'] = 'http://owncloud' if not runningOnOCIS else 'http://reva:9140'
 	return [{
 		'name': 'webui-acceptance-tests',
 		'image': 'owncloudci/nodejs:11',
@@ -1117,8 +1188,7 @@ def runWebuiAcceptanceTests(suite, alternateSuiteName, filterTags, extraEnvironm
 		'environment': environment,
 		'commands': [
 			'cd /var/www/owncloud/phoenix',
-			'cp -r /var/www/owncloud/phoenix/tests/drone /srv/config',
-			'curl http://phoenix/oidc-callback.html' if not runningOnOCIS else 'curl http://ocis:9100/oidc-callback.html',
+			# 'curl http://phoenix/oidc-callback.html' if not runningOnOCIS else 'curl http://ocis:9100/oidc-callback.html',
 			'yarn run acceptance-tests-drone',
 		],
 		'volumes': [{
@@ -1134,7 +1204,7 @@ def ocisTestServices():
 		'pull': 'always',
 		'environment': {
 			'LDAP_DOMAIN': 'owncloud.com',
-			'LDAP_ORGANISATION': 'ownCloud',
+			'LDAP_ORGANISATION': 'owncloud',
 			'LDAP_ADMIN_PASSWORD': 'admin',
 			'LDAP_TLS_VERIFY_CLIENT': 'never',
 			'HOSTNAME': 'ldap'
