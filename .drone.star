@@ -1043,6 +1043,10 @@ def revaService():
 			'REVA_OIDC_ISSUER': 'https://konnectd:9130',
 		},
 		'commands': [
+			'mkdir -p $REVA_STORAGE_HOME_DATA_TEMP_FOLDER',
+			'mkdir -p $REVA_STORAGE_LOCAL_ROOT',
+			'mkdir -p $REVA_STORAGE_OWNCLOUD_DATADIR',
+			'mkdir -p $REVA_STORAGE_OC_DATA_TEMP_FOLDER',
 			'cd /var/www/owncloud',
 			'./ocis-reva gateway &',
 			'./ocis-reva users &',
