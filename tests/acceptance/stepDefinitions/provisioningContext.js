@@ -244,13 +244,15 @@ After(async function () {
             if (fs.existsSync(join(dataDir, 'data', user))) {
               fs.emptyDirSync(join(dataDir, 'data', user))
             }
-            console.log('Deleting LDAP User: ', user)
+            console.log('Deleted LDAP User: ', user)
+            createdUsers.pop(user)
           })
       }),
-      ...createdGroups.map(user => {
-        return ldap.deleteGroup(client.globals.ldapClient, user)
-          .catch(err => {
-            console.log(err)
+      ...createdGroups.map(group => {
+        return ldap.deleteGroup(client.globals.ldapClient, group)
+          .then(() => {
+            console.log('Deleted LDAP Group: ', group)
+            createdGroups.pop(group)
           })
       })
     ])

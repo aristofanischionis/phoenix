@@ -87,7 +87,7 @@ config = {
 				'LDAP_SERVER_URL': 'ldap://ldap',
 			},
 			'runningOnOCIS': True,
-			'filterTags': '@issue-1910 and not @skipOnOCIS',
+			# 'filterTags': '@issue-1910 and not @skipOnOCIS',
 		}
 	},
 
