@@ -76,14 +76,14 @@ config = {
 		# },
 		'webUI-ocis': {
 			'suites': {
-				'all': 'webUIOCIS',
+				'webUIFiles': 'webUIOCIS',
 			},
 			'extraEnvironment': {
 				'SERVER_HOST': 'http://ocis:9100',
 				'BACKEND_HOST': 'http://reva:9140',
 				'RUN_ON_OCIS': 'true',
 				'OCIS_SKELETON_DIR': '/var/www/owncloud/server/apps/testing/data/webUISkeleton',
-				'OCIS_REVA_DATA_ROOT': '/srv/tmp/reva/',
+				'OCIS_REVA_DATA_ROOT': '/srv/app/tmp/reva/',
 				'LDAP_SERVER_URL': 'ldap://ldap',
 			},
 			'runningOnOCIS': True,
@@ -420,6 +420,9 @@ def acceptance():
 								'temp': {}
 							}, {
 								'name': 'configs',
+								'temp': {}
+							}, {
+								'name': 'revaData',
 								'temp': {}
 							}]
 						}
@@ -1188,12 +1191,12 @@ def runWebuiAcceptanceTests(suite, alternateSuiteName, filterTags, extraEnvironm
 		'environment': environment,
 		'commands': [
 			'cd /var/www/owncloud/phoenix',
-			# 'curl http://phoenix/oidc-callback.html' if not runningOnOCIS else 'curl http://ocis:9100/oidc-callback.html',
+			'curl http://phoenix/oidc-callback.html' if not runningOnOCIS else 'curl http://ocis:9100/oidc-callback.html',
 			'yarn run acceptance-tests-drone',
 		],
 		'volumes': [{
-			'name': 'reva-data-path',
-			'path': '/srv/app/reva/tmp',
+			'name': 'revaData',
+			'path': '/srv/app',
 		}],
 	}]
 
