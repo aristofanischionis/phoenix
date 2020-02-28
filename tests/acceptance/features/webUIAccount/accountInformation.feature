@@ -15,6 +15,7 @@ Feature: View account information
       | Email             | user1@example.org             |
       | Groups membership | You are not part of any group |
 
+  @skipOnOCIS
   Scenario: view account information when the user has been added to a group
     Given these groups have been created:
       | groupname |
@@ -28,6 +29,7 @@ Feature: View account information
       | Email             | user1@example.org |
       | Groups membership | Group1            |
 
+  @skipOnOCIS
   Scenario: view account information when the user has been added to multiple groups
     Given these groups have been created:
       | groupname |

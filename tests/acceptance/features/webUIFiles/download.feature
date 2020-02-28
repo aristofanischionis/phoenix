@@ -1,3 +1,4 @@
+@skipOnOCIS
 Feature: download files
   As a user
   I want to download files

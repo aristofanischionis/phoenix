@@ -1,3 +1,4 @@
+@skipOnOCIS
 Feature: display notifications on the webUI
 
   As a user

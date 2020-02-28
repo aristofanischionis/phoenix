@@ -76,7 +76,34 @@ config = {
 		# },
 		'webUI-ocis': {
 			'suites': {
-				'webUICreateFilesFolders': 'webUIOCIS',
+				'webUICreateFilesFolders': 'createFilesFolders',
+				'webUIDeleteFilesFolders': 'deleteFilesFolders',
+				'webUIFavorites': 'Favorites',
+				'webUIFiles': 'Files',
+				'webUILogin': 'Login',
+				'webUINotifications': 'Notifications',
+				'webUIPrivateLinks': 'PrivateLinks',
+				'webUIRenameFiles': 'RenameFiles',
+				'webUIRenameFolders': 'RenameFolders',
+				'webUIRestrictSharing': 'RestrictSharing',
+				'webUISharingAutocompletion': 'SharingAutocompletion',
+				'webUISharingInternalGroups': 'SharingInternalGroups',
+				'webUISharingInternalUsers': 'SharingInternalUsers',
+				'webUISharingPermissionsUsers': 'SharingPermissionsUsers',
+				'webUISharingFilePermissionsGroups': 'SharingFilePermissionsGroups',
+				'webUISharingFolderPermissionsGroups': 'SharingFolderPermissionsGroups',
+				'webUISharingFolderAdvancedPermissionsGroups': 'SharingFolderAdvPermissionsGrp',
+				'webUIResharing': 'Resharing',
+				'webUISharingPublic': 'SharingPublic',
+				'webUISharingPublicDifferentRoles': 'SharingPublicDifferentRoles',
+				'webUITrashbin': 'Trashbin',
+				'webUIUpload': 'Upload',
+				'webUISharingAcceptShares': 'SharingAcceptShares',
+				'webUISharingFilePermissionMultipleUsers': 'SharingFilePermissionMultipleUsers',
+				'webUISharingFolderPermissionMultipleUsers': 'SharingFolderPermissionMultipleUsers',
+				'webUISharingFolderAdvancedPermissionMultipleUsers': 'SharingFolderAdvancedPermissionMU',
+				'webUISharingNotifications': 'SharingNotifications',
+				'webUIAccount': 'Account'
 			},
 			'extraEnvironment': {
 				'SERVER_HOST': 'http://ocis:9100',
@@ -85,9 +112,11 @@ config = {
 				'OCIS_SKELETON_DIR': '/var/www/owncloud/server/apps/testing/data/webUISkeleton',
 				'OCIS_REVA_DATA_ROOT': '/srv/app/tmp/reva/',
 				'LDAP_SERVER_URL': 'ldap://ldap',
+				'CI': 'true',
+				'OCIS_PHOENIX_CONFIG': '/srv/config/drone/ocis-config.json'
 			},
 			'runningOnOCIS': True,
-			# 'filterTags': '@issue-1910 and not @skipOnOCIS',
+			'filterTags': 'not @skip and not @skipOnOCIS',
 		}
 	},
 
@@ -749,7 +778,8 @@ def installNPM():
 		'image': 'owncloudci/nodejs:10',
 		'pull': 'always',
 		'commands': [
-			'yarn install --frozen-lockfile'
+    			'yarn install --frozen-lockfile',
+			'ls -la'
 		]
 	}]
 
@@ -769,8 +799,8 @@ def buildPhoenix():
 		'image': 'owncloudci/nodejs:10',
 		'pull': 'always',
 		'commands': [
-			'yarn dist',
-			'cp tests/drone/config.json dist/config.json',
+			# 'yarn dist',
+			# 'cp tests/drone/config.json dist/config.json',
 			'mkdir -p /srv/config',
 			'cp -r /var/www/owncloud/phoenix/tests/drone /srv/config',
 		],
@@ -1199,6 +1229,8 @@ def runWebuiAcceptanceTests(suite, alternateSuiteName, filterTags, extraEnvironm
 		'environment': environment,
 		'commands': [
 			'cd /var/www/owncloud/phoenix',
+			'mkdir -p $OCIS_REVA_DATA_ROOT',
+			'ls -la $OCIS_REVA_DATA_ROOT',
 			'curl http://phoenix/oidc-callback.html' if not runningOnOCIS else 'curl http://ocis:9100/oidc-callback.html',
 			'yarn run acceptance-tests-drone',
 		],

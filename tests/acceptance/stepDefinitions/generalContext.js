@@ -195,6 +195,10 @@ After(async function (testCase) {
 
 Before(function () {
   if (client.globals.ocis) {
+    if (client.globals.ocis_phoenix_config) {
+      this.fullPathOfConfigFile = client.globals.ocis_phoenix_config
+      initialConfigJsonSettings = getConfigJsonContent(this.fullPathOfConfigFile)
+    }
     return
   }
   this.fullPathOfConfigFile = path.join(__dirname, '/../../../dist/config.json')

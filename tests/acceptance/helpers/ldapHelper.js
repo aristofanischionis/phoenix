@@ -115,8 +115,11 @@ exports.createUser = async function (ldapClient, user, password = null, displayN
       userHelper.addUserToCreatedUsersList(user, password, displayName, email)
       const skelDir = client.globals.ocis_skeleton_dir
       if (skelDir) {
-        const dataDir = join(client.globals.ocis_data_dir, 'data', user, 'files')
-        return fs.copy(skelDir, dataDir)
+        const dataDir = join(client.globals.ocis_data_dir, 'data', user)
+        if (!fs.existsSync(dataDir)) {
+          fs.mkdirSync(dataDir)
+        }
+        return fs.copy(skelDir, join(dataDir, 'files'))
       }
       return
     }

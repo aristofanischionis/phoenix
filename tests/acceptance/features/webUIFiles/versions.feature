@@ -1,4 +1,4 @@
-@files_versions-app-required
+@files_versions-app-required @skipOnOCIS
 Feature: Versions of a file
 
   As a user

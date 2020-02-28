@@ -1,3 +1,4 @@
+@skipOnOCIS
 Feature: Sort files/folders
 
   As a user

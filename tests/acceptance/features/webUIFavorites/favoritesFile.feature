@@ -1,3 +1,4 @@
+@skipOnOCIS
 Feature: Mark file as favorite
 
   As a user

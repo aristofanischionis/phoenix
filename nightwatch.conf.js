@@ -22,6 +22,7 @@ const LDAP_SERVER_URL = process.env.LDAP_SERVER_URL || 'ldap://127.0.0.1'
 const LDAP_BASE_DN = process.env.LDAP_BASE_DN || 'cn=admin,dc=owncloud,dc=com'
 const LDAP_ADMIN_PASSWORD = process.env.LDAP_ADMIN_PASSWORD || 'admin'
 const OCIS_SKELETON_DIR = process.env.OCIS_SKELETON_DIR
+const OCIS_PHOENIX_CONFIG = process.env.OCIS_PHOENIX_CONFIG || false
 
 module.exports = {
   page_objects_path: './tests/acceptance/pageObjects',
@@ -44,7 +45,8 @@ module.exports = {
         ocis_data_dir: OCIS_REVA_DATA_ROOT,
         ldap_base_dn: LDAP_BASE_DN,
         ocis_skeleton_dir: OCIS_SKELETON_DIR,
-        ldap_password: LDAP_ADMIN_PASSWORD
+        ldap_password: LDAP_ADMIN_PASSWORD,
+        ocis_phoenix_config: OCIS_PHOENIX_CONFIG
       },
       selenium_host: SELENIUM_HOST,
       desiredCapabilities: {

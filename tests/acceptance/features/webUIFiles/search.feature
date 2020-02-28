@@ -1,3 +1,4 @@
+@skipOnOCIS
 Feature: Search
 
   As a user

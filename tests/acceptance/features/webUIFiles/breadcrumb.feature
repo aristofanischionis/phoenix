@@ -12,6 +12,7 @@ Feature: access breadcrumb
     When the user opens folder "simple-folder" using the webUI
     Then breadcrumb for folder "simple-folder" should be displayed on the webUI
 
+  @skipOnOCIS
   Scenario: Change rootFolder to simple-folder and check for the displayed files
     Given the property "rootFolder" has been set to "simple-folder" in phoenix config file
     And user "user1" has logged in using the webUI
@@ -20,7 +21,7 @@ Feature: access breadcrumb
     But as "user1" folder "0" should exist
     And file "lorem.txt" should be listed on the webUI
 
-  @issue-1883
+  @issue-1883 @skipOnOCIS
   Scenario: Select breadcrumb inside folder with problematic name
     Given the property "rootFolder" has been deleted in phoenix config file
     And user "user1" has created folder "folder%2Fwith%2FSlashes"
@@ -30,7 +31,7 @@ Feature: access breadcrumb
     Then the error message with header "Loading folder failed…" should be displayed on the webUI
 #    Then no message should be displayed on the webUI
 
-  @issue-1883
+  @issue-1883 @skipOnOCIS
   Scenario: Reload webUI inside the problamatic folder
     Given user "user1" has created folder "folder%2Fwith%2FSlashes"
     And user "user1" has logged in using the webUI
