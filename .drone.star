@@ -76,7 +76,7 @@ config = {
 		# },
 		'webUI-ocis': {
 			'suites': {
-				'webUIFiles': 'webUIOCIS',
+				'webUICreateFilesFolders': 'webUIOCIS',
 			},
 			'extraEnvironment': {
 				'SERVER_HOST': 'http://ocis:9100',
@@ -422,7 +422,7 @@ def acceptance():
 								'name': 'configs',
 								'temp': {}
 							}, {
-								'name': 'revaData',
+								'name': 'gopath',
 								'temp': {}
 							}]
 						}
@@ -1039,8 +1039,10 @@ def revaService():
 			'REVA_STORAGE_LOCAL_ROOT': '/srv/app/tmp/reva/root',
 			'REVA_STORAGE_OWNCLOUD_DATADIR': '/srv/app/tmp/reva/data',
 			'REVA_STORAGE_OC_DATA_TEMP_FOLDER': '/srv/app/tmp/',
-			'REVA_STORAGE_OWNCLOUD_REDIS_ADDR': 'redis:6379',
 			'REVA_OIDC_ISSUER': 'https://konnectd:9130',
+			'REVA_USERS_DRIVER': 'ldap',
+			'REVA_STORAGE_HOME_EXPOSE_DATA_SERVER': '1',
+			'REVA_STORAGE_OC_EXPOSE_DATA_SERVER': '1'
 		},
 		'commands': [
 			'mkdir -p $REVA_STORAGE_HOME_DATA_TEMP_FOLDER',
@@ -1168,8 +1170,6 @@ def runWebuiAcceptanceTests(suite, alternateSuiteName, filterTags, extraEnvironm
 	environment = {}
 	if (filterTags != ''):
 		environment['TEST_TAGS'] = filterTags
-	for env in extraEnvironment:
-		environment[env] = extraEnvironment[env]
 	if isLocalBrowser(browser):
 		environment['LOCAL_UPLOAD_DIR'] = '/uploads'
 		if (suite != 'all'):
@@ -1186,8 +1186,12 @@ def runWebuiAcceptanceTests(suite, alternateSuiteName, filterTags, extraEnvironm
 			'from_secret': 'sauce_access_key'
 		}
 
-	environment['SERVER_HOST'] = 'http://phoenix' if not runningOnOCIS else 'http://ocis:9100'
-	environment['BACKEND_HOST'] = 'http://owncloud' if not runningOnOCIS else 'http://reva:9140'
+	environment['SERVER_HOST'] = 'http://phoenix'
+	environment['BACKEND_HOST'] = 'http://owncloud'
+
+	for env in extraEnvironment:
+		environment[env] = extraEnvironment[env]
+
 	return [{
 		'name': 'webui-acceptance-tests',
 		'image': 'owncloudci/nodejs:11',
@@ -1199,7 +1203,7 @@ def runWebuiAcceptanceTests(suite, alternateSuiteName, filterTags, extraEnvironm
 			'yarn run acceptance-tests-drone',
 		],
 		'volumes': [{
-			'name': 'revaData',
+			'name': 'gopath',
 			'path': '/srv/app',
 		}],
 	}]
