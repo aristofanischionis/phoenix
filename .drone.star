@@ -1237,6 +1237,9 @@ def runWebuiAcceptanceTests(suite, alternateSuiteName, filterTags, extraEnvironm
 		'volumes': [{
 			'name': 'gopath',
 			'path': '/srv/app',
+		},{
+			'name': 'configs',
+			'path': '/srv/config'
 		}],
 	}]
 
