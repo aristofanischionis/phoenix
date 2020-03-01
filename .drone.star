@@ -116,7 +116,7 @@ config = {
 				'OCIS_PHOENIX_CONFIG': '/srv/config/drone/ocis-config.json'
 			},
 			'runningOnOCIS': True,
-			'filterTags': 'not @skip and not @skipOnOCIS',
+			'filterTags': 'not @skip',
 		}
 	},
 
