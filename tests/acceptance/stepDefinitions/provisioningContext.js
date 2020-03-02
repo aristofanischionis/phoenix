@@ -243,6 +243,7 @@ After(async function () {
             const dataDir = client.globals.ocis_data_dir
             if (fs.existsSync(join(dataDir, 'data', user))) {
               fs.emptyDirSync(join(dataDir, 'data', user))
+              fs.rmdirSync(join(dataDir, 'data', user))
             }
             console.log('Deleted LDAP User: ', user)
             createdUsers.pop(user)
