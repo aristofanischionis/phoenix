@@ -1,4 +1,4 @@
-@files_trashbin-app-required
+@files_trashbin-app-required @skipOnOCIS
 Feature: files and folders exist in the trashbin after being deleted
   As a user
   I want deleted files and folders to be available in the trashbin

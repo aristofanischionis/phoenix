@@ -6,6 +6,7 @@ Feature: view profile
   Background:
     Given user "user1" has been created with default attributes
 
+  @skipOnOCIS
   Scenario: view user profile for the logged in user
     When user "user1" logs in using the webUI
     Then the user profile should be visible in the webUI

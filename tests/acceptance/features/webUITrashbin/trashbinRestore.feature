@@ -1,4 +1,4 @@
-@files_trashbin-app-required
+@files_trashbin-app-required @skipOnOCIS
 Feature: Restore deleted files/folders
   As a user
   I would like to restore files/folders

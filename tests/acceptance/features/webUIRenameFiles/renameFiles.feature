@@ -1,3 +1,4 @@
+@skipOnOCIS
 Feature: rename files
   As a user
   I want to rename files

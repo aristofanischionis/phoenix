@@ -76,34 +76,7 @@ config = {
 		# },
 		'webUI-ocis': {
 			'suites': {
-				'webUICreateFilesFolders': 'createFilesFolders',
-				'webUIDeleteFilesFolders': 'deleteFilesFolders',
-				'webUIFavorites': 'Favorites',
-				'webUIFiles': 'Files',
-				'webUILogin': 'Login',
-				'webUINotifications': 'Notifications',
-				'webUIPrivateLinks': 'PrivateLinks',
-				'webUIRenameFiles': 'RenameFiles',
-				'webUIRenameFolders': 'RenameFolders',
-				'webUIRestrictSharing': 'RestrictSharing',
-				'webUISharingAutocompletion': 'SharingAutocompletion',
-				'webUISharingInternalGroups': 'SharingInternalGroups',
-				'webUISharingInternalUsers': 'SharingInternalUsers',
-				'webUISharingPermissionsUsers': 'SharingPermissionsUsers',
-				'webUISharingFilePermissionsGroups': 'SharingFilePermissionsGroups',
-				'webUISharingFolderPermissionsGroups': 'SharingFolderPermissionsGroups',
-				'webUISharingFolderAdvancedPermissionsGroups': 'SharingFolderAdvPermissionsGrp',
-				'webUIResharing': 'Resharing',
-				'webUISharingPublic': 'SharingPublic',
-				'webUISharingPublicDifferentRoles': 'SharingPublicDifferentRoles',
-				'webUITrashbin': 'Trashbin',
-				'webUIUpload': 'Upload',
-				'webUISharingAcceptShares': 'SharingAcceptShares',
-				'webUISharingFilePermissionMultipleUsers': 'SharingFilePermissionMultipleUsers',
-				'webUISharingFolderPermissionMultipleUsers': 'SharingFolderPermissionMultipleUsers',
-				'webUISharingFolderAdvancedPermissionMultipleUsers': 'SharingFolderAdvancedPermissionMU',
-				'webUISharingNotifications': 'SharingNotifications',
-				'webUIAccount': 'Account'
+				'all': 'webUIOCIS'
 			},
 			'extraEnvironment': {
 				'SERVER_HOST': 'http://ocis:9100',
@@ -116,7 +89,7 @@ config = {
 				'OCIS_PHOENIX_CONFIG': '/srv/config/drone/ocis-config.json'
 			},
 			'runningOnOCIS': True,
-			'filterTags': 'not @skip',
+			'filterTags': 'not @skip and not @skipOnOCIS',
 		}
 	},
 

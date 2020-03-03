@@ -226,5 +226,13 @@ module.exports = {
    */
   getCreatedGroups: function () {
     return this.createdGroups
+  },
+
+  resetCreatedUsers: function () {
+    this.createdUsers = {}
+  },
+
+  resetCreatedGroups: function () {
+    this.createdGroups = []
   }
 }

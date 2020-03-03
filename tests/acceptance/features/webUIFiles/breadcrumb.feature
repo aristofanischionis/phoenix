@@ -21,7 +21,7 @@ Feature: access breadcrumb
     But as "user1" folder "0" should exist
     And file "lorem.txt" should be listed on the webUI
 
-  @issue-1883 @skipOnOCIS
+  @issue-1883
   Scenario: Select breadcrumb inside folder with problematic name
     Given the property "rootFolder" has been deleted in phoenix config file
     And user "user1" has created folder "folder%2Fwith%2FSlashes"
@@ -31,7 +31,7 @@ Feature: access breadcrumb
     Then the error message with header "Loading folder failed…" should be displayed on the webUI
 #    Then no message should be displayed on the webUI
 
-  @issue-1883 @skipOnOCIS
+  @issue-1883
   Scenario: Reload webUI inside the problamatic folder
     Given user "user1" has created folder "folder%2Fwith%2FSlashes"
     And user "user1" has logged in using the webUI

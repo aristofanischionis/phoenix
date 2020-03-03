@@ -236,27 +236,28 @@ After(async function () {
   const createdGroups = userSettings.getCreatedGroups()
 
   if (client.globals.ocis) {
-    await Promise.all([
-      ...createdUsers.map(user => {
-        return ldap.deleteUser(client.globals.ldapClient, user)
-          .then(() => {
-            const dataDir = client.globals.ocis_data_dir
-            if (fs.existsSync(join(dataDir, 'data', user))) {
-              fs.emptyDirSync(join(dataDir, 'data', user))
-              fs.rmdirSync(join(dataDir, 'data', user))
-            }
-            console.log('Deleted LDAP User: ', user)
-            createdUsers.pop(user)
-          })
-      }),
-      ...createdGroups.map(group => {
-        return ldap.deleteGroup(client.globals.ldapClient, group)
-          .then(() => {
-            console.log('Deleted LDAP Group: ', group)
-            createdGroups.pop(group)
-          })
+    const deleteUserPromises = createdUsers.map(
+      user => ldap.deleteUser(client.globals.ldapClient, user)
+        .then(() => {
+          const dataDir = client.globals.ocis_data_dir
+          if (fs.existsSync(join(dataDir, 'data', user))) {
+            fs.emptyDirSync(join(dataDir, 'data', user))
+            fs.rmdirSync(join(dataDir, 'data', user))
+          }
+          console.log('Deleted LDAP User: ', user)
+        })
+    )
+    const deleteGroupPromises = createdGroups.map(
+      group => ldap.deleteGroup(client.globals.ldapClient, group)
+        .then(() => {
+          console.log('Deleted LDAP Group: ', group)
+        })
+    )
+    await Promise.all([...deleteUserPromises, ...deleteGroupPromises])
+      .then(() => {
+        userSettings.resetCreatedUsers()
+        userSettings.resetCreatedGroups()
       })
-    ])
   } else {
     await Promise.all(
       [...createdUsers.map(deleteUser), ...createdGroups.map(deleteGroup)]
