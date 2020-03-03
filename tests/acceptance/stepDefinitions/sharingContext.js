@@ -31,12 +31,11 @@ const userSharesFileOrFolderWithUserOrGroup = async function (
 
   await api.appSideBar().closeSidebar(100)
   await api.filesList().waitForFileVisible(file)
-  await api
+  return api
     .filesList()
     .openFileActionsMenu(file)
     .openCollaboratorsDialog()
-
-  return api.sharingDialog().shareWithUserOrGroup(sharee, shareWithGroup, role, permissions, remote)
+    .shareWithUserOrGroup(sharee, shareWithGroup, role, permissions, remote)
 }
 
 /**
@@ -768,12 +767,7 @@ Then('user {string} should be listed as {string} in the collaborators list for f
       .FilesPageElement
       .appSideBar()
       .closeSidebar(100)
-      .waitForFileVisible(resource)
-    await client.page
-      .FilesPageElement
-      .filesList()
-      .openFileActionsMenu(resource)
-      .openCollaboratorsDialog()
+      .openSharingDialog(resource)
 
     return assertCollaboratorslistContains('user', user, { role })
   })
@@ -792,12 +786,7 @@ Then('group {string} should be listed as {string} in the collaborators list for 
       .FilesPageElement
       .appSideBar()
       .closeSidebar(100)
-      .waitForFileVisible(resource)
-    await client.page
-      .FilesPageElement
-      .filesList()
-      .openFileActionsMenu(resource)
-      .openCollaboratorsDialog()
+      .openSharingDialog(resource)
     return assertCollaboratorslistContains('group', group, { role })
   })
 
@@ -834,11 +823,9 @@ Then('the user should not be able to share file/folder/resource {string} using t
   await api
     .appSideBar()
     .closeSidebar(100)
-    .waitForFileVisible(resource)
+    .openSharingDialog(resource)
   const shareResponse = await api
-    .filesList()
-    .openFileActionsMenu(resource)
-    .openCollaboratorsDialog()
+    .sharingDialog()
     .getSharingPermissionMsg()
   const noSharePermissionsMsgFormat = "You don't have permission to share this %s."
   const noSharePermissionsFileMsg = util.format(noSharePermissionsMsgFormat, 'file')

@@ -161,9 +161,10 @@ Given('the user has opened folder {string}', (folder) => client.page.FilesPageEl
 When('the user opens folder {string} using the webUI', (folder) => client.page.FilesPageElement.filesList().navigateToFolder(folder))
 
 Given('the user has opened the share dialog for file/folder {string}', async function (fileName) {
-  await client.page.FilesPageElement.filesList().openSharingDialog(fileName)
-
-  return client
+  return client.page.FilesPageElement
+    .appSideBar()
+    .closeSidebar(100)
+    .openSharingDialog(fileName)
 })
 
 When('the user browses to folder {string} using the breadcrumb on the webUI', (resource) =>
@@ -182,7 +183,7 @@ When('the user deletes the following elements using the webUI', async function (
     await client.page.FilesPageElement.filesList().deleteFile(line[0])
     deletedElements.push(line[0])
   }
-  return client
+  return client.page.filesPage()
 })
 
 Then('there should be no breadcrumb displayed on the webUI', function () {
@@ -786,7 +787,10 @@ When('the user browses to the folder {string} on the files page', (folderName) =
     .navigateAndWaitTillLoaded(targetFolder)
 })
 When('the user copies the permalink of the file/folder/resource {string} using the webUI', async function (file) {
-  await client.page.FilesPageElement.filesList().openSharingDialog(file, 'links')
+  await client.page.FilesPageElement
+    .appSideBar()
+    .closeSidebar(100)
+    .openPublicLinksDialog(file)
   await client.page.filesPage().copyPermalinkFromFilesAppBar()
   return client
 })

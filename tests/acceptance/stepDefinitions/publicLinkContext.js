@@ -119,12 +119,10 @@ When('the user edits the public link named {string} of file/folder/resource {str
   async function (linkName, resource, dataTable) {
     const editData = dataTable.rowsHash()
     await filesList.waitForFileVisible(resource)
-    await filesList
+    return filesList
       .openFileActionsMenu(resource)
       .openLinksDialog()
       .editPublicLink(linkName, editData)
-    return client.page.FilesPageElement
-      .publicLinksDialog()
       .savePublicLink()
   })
 
@@ -162,7 +160,9 @@ Then('public link named {string} should not be listed on the public links list o
 })
 
 async function findMatchingPublicLinkByName (name, role, resource, via = null) {
-  await client.page.FilesPageElement.appSideBar().closeSidebar(100)
+  await client.page.FilesPageElement
+    .appSideBar()
+    .closeSidebar(100)
   await filesList.waitForFileVisible(resource)
   const shares = await filesList
     .openFileActionsMenu(resource)
