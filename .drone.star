@@ -1231,7 +1231,8 @@ def runWebuiAcceptanceTests(suite, alternateSuiteName, filterTags, extraEnvironm
 			'cd /var/www/owncloud/phoenix',
 			'mkdir -p $OCIS_REVA_DATA_ROOT',
 			'ls -la $OCIS_REVA_DATA_ROOT',
-			'curl http://phoenix/oidc-callback.html' if not runningOnOCIS else 'curl http://ocis:9100/oidc-callback.html',
+			# 'curl http://phoenix/oidc-callback.html' if not runningOnOCIS else 'curl http://ocis:9100/oidc-callback.html',
+			'timeout 60 bash -c \'while [[ "$(curl -s -o /dev/null -w \'\'%{http_code}\'\' http://phoenix:9100/oidc-callback.html)" != "200" ]]; do sleep 5; done\'' if not runningOnOCIS else 'timeout 60 bash -c \'while [[ "$(curl -s -o /dev/null -w \'\'%{http_code}\'\' http://ocis:9100/oidc-callback.html)" != "200" ]]; do sleep 5; done\'',
 			'yarn run acceptance-tests-drone',
 		],
 		'volumes': [{
