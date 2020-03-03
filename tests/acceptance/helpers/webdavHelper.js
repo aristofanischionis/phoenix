@@ -24,7 +24,7 @@ exports.createDavPath = function (userId, element) {
  */
 exports.download = function (userId, file) {
   const davPath = exports.createDavPath(userId, file)
-  return httpHelper.getWebdav(
+  return httpHelper.get(
     davPath,
     {},
     userId
@@ -40,7 +40,7 @@ exports.download = function (userId, file) {
  */
 exports.delete = function (userId, file) {
   const davPath = exports.createDavPath(userId, file)
-  return httpHelper.deleteWebdav(
+  return httpHelper.delete(
     davPath,
     {},
     userId
@@ -58,7 +58,7 @@ exports.delete = function (userId, file) {
  */
 exports.move = function (userId, fromName, toName) {
   const davPath = exports.createDavPath(userId, fromName)
-  return httpHelper.moveWebdav(
+  return httpHelper.move(
     davPath,
     {},
     userId,
@@ -88,7 +88,7 @@ exports.propfind = function (path, userId, properties, folderDepth = 1) {
                 xmlns:ocs="http://open-collaboration-services.org/ns">
                 <d:prop>${propertyBody}</d:prop>
                 </d:propfind>`
-  return httpHelper.propfindWebdav(
+  return httpHelper.propfind(
     davPath,
     { body },
     userId,
@@ -143,7 +143,7 @@ exports.getTrashBinElements = function (user, depth = 2) {
  */
 exports.createFolder = function (user, folderName) {
   const davPath = exports.createDavPath(user, folderName)
-  return httpHelper.mkcolWebdav(davPath, {}, user)
+  return httpHelper.mkcol(davPath, {}, user)
     .then(res => httpHelper.checkStatus(res, `Could not create the folder "${folderName}" for user "${user}".`))
     .then(res => res.text())
 }
@@ -156,7 +156,7 @@ exports.createFolder = function (user, folderName) {
  */
 exports.createFile = function (user, fileName, contents = '') {
   const davPath = exports.createDavPath(user, fileName)
-  return httpHelper.putWebdav(davPath, { body: contents }, user)
+  return httpHelper.put(davPath, { body: contents }, user)
     .then(res => httpHelper.checkStatus(res, `Could not create the file "${fileName}" for user "${user}".`))
     .then(res => res.text())
 }
@@ -202,7 +202,7 @@ exports.getSkeletonFile = function (filename) {
         '/ocs/v2.php/apps/testing/api/v1/file',
         `?file=${encodeURIComponent(element)}&absolute=true&format=json`
       )
-      return httpHelper.getWebdav(apiURL, { method: 'GET' })
+      return httpHelper.get(apiURL, { method: 'GET' })
     })
     .then(res => res.json())
     .then(body => {
@@ -212,7 +212,7 @@ exports.getSkeletonFile = function (filename) {
 
 exports.uploadFileWithContent = function (user, content, filename) {
   const apiURL = join(backendHelper.getCurrentBackendUrl(), '/remote.php/webdav/', filename)
-  return httpHelper.putWebdav(apiURL,
+  return httpHelper.put(apiURL,
     { body: content },
     user,
     { 'Content-Type': 'text/plain' }
@@ -227,7 +227,7 @@ exports.getFavouritedResources = function (user) {
                      <oc:favorite>1</oc:favorite>
                  </oc:filter-rules>
                 </oc:filter-files>`
-  return httpHelper.reportWebdav(client.globals.backend_url + `/remote.php/dav/files/${user}`,
+  return httpHelper.report(client.globals.backend_url + `/remote.php/dav/files/${user}`,
     { body },
     user)
     .then(res => res.text())

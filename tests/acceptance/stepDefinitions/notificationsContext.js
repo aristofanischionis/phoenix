@@ -11,7 +11,7 @@ When('user {string} is sent a notification', function (user) {
   body.append('user', user)
   const apiURL = join(client.globals.backend_url, '/ocs/v2.php/apps/testing/api/v1/notifications')
 
-  return httpHelper.post(apiURL, { body })
+  return httpHelper.postOCS(apiURL, { body })
     .then(res => httpHelper.checkStatus(res, 'Could not generate notification.'))
 })
 
@@ -38,7 +38,7 @@ Given('app {string} has been {}', async function (app, action) {
     action === 'enabled' ? 'enable' : 'disable'
   )
   const apiURL = join(client.globals.backend_url, '/ocs/v2.php/cloud/apps/', app, '?format=json')
-  const response = await action === 'enabled' ? httpHelper.post(apiURL) : httpHelper.delete(apiURL)
+  const response = await action === 'enabled' ? httpHelper.postOCS(apiURL) : httpHelper.deleteOCS(apiURL)
   response.then(res => {
     httpHelper.checkStatus(res, errorMessage)
     return res.json()

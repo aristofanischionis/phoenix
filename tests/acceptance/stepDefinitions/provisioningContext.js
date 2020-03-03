@@ -25,7 +25,7 @@ function createUser (userId, password, displayName = false, email = false) {
     backendHelper.getCurrentBackendUrl(),
     '/ocs/v2.php/cloud/users?format=json'
   )
-  return httpHelper.post(url, { body })
+  return httpHelper.postOCS(url, { body })
     .then(() => {
       if (displayName !== false) {
         promiseList.push(new Promise((resolve, reject) => {
@@ -36,7 +36,7 @@ function createUser (userId, password, displayName = false, email = false) {
             backendHelper.getCurrentBackendUrl(),
             `/ocs/v2.php/cloud/users/${encodeURIComponent(userId)}?format=json`
           )
-          httpHelper.put(url, { body })
+          httpHelper.putOCS(url, { body })
             .then(res => {
               if (res.status !== 200) {
                 reject(new Error('Could not set display name of user'))
@@ -56,7 +56,7 @@ function createUser (userId, password, displayName = false, email = false) {
             backendHelper.getCurrentBackendUrl(),
             `/ocs/v2.php/cloud/users/${encodeURIComponent(userId)}?format=json`
           )
-          httpHelper.put(url, { body })
+          httpHelper.putOCS(url, { body })
             .then(res => {
               if (res.status !== 200) {
                 reject(new Error('Could not set email of user'))
@@ -78,7 +78,7 @@ function deleteUser (userId) {
     '/ocs/v2.php/cloud/users/',
     userId
   )
-  return httpHelper.delete(url)
+  return httpHelper.deleteOCS(url)
 }
 
 function initUser (userId) {
@@ -87,7 +87,7 @@ function initUser (userId) {
     '/ocs/v2.php/cloud/users/',
     userId
   )
-  return httpHelper.get(url, {}, userId)
+  return httpHelper.getOCS(url, {}, userId)
 }
 
 /**
@@ -100,7 +100,7 @@ function createGroup (groupId) {
   body.append('groupid', groupId)
   userSettings.addGroupToCreatedGroupsList(groupId)
   const url = join(client.globals.backend_url, '/ocs/v2.php/cloud/groups?format=json')
-  return httpHelper.post(url, { body })
+  return httpHelper.postOCS(url, { body })
 }
 
 /**
@@ -111,14 +111,14 @@ function createGroup (groupId) {
 function deleteGroup (groupId) {
   userSettings.deleteGroupFromCreatedGroupsList(groupId)
   const url = join(client.globals.backend_url, '/ocs/v2.php/cloud/groups/', groupId)
-  return httpHelper.delete(url)
+  return httpHelper.deleteOCS(url)
 }
 
 function addToGroup (userId, groupId) {
   const body = new URLSearchParams()
   body.append('groupid', groupId)
   const url = join(client.globals.backend_url, `/ocs/v2.php/cloud/users/${userId}/groups`)
-  return httpHelper.post(url, { body })
+  return httpHelper.postOCS(url, { body })
 }
 
 Given('user {string} has been created with default attributes', function (userId) {
@@ -141,7 +141,7 @@ Given('the quota of user {string} has been set to {string}', function (userId, q
   body.append('key', 'quota')
   body.append('value', quota)
   const url = join(client.globals.backend_url, '/ocs/v2.php/cloud/users/', userId)
-  return httpHelper.put(url, { body })
+  return httpHelper.putOCS(url, { body })
     .then(res => httpHelper.checkStatus(res, 'Could not set quota.'))
 })
 

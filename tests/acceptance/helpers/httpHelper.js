@@ -69,7 +69,7 @@ exports.checkOCSStatus = function (response, message) {
  *
  * @returns {node-fetch}
  */
-exports.requestWebdavEndpoint = function (url, params, userId = 'admin', header = {}) {
+exports.requestEndpoint = function (url, params, userId = 'admin', header = {}) {
   const headers = { ...this.createAuthHeader(userId), ...header }
   const options = { ...params, headers }
   return fetch(url, options)
@@ -84,122 +84,9 @@ exports.requestWebdavEndpoint = function (url, params, userId = 'admin', header 
  *
  * @returns {node-fetch}
  */
-exports.mkcolWebdav = function (url, params, userId, header) {
+exports.mkcol = function (url, params, userId, header) {
   const options = { ...params, method: 'MKCOL' }
-  return this.requestWebdavEndpoint(url, options, userId, header)
-}
-
-/**
- *
- * @param {string} url
- * @param {object} params
- * @param {string} userId
- * @param {object} header
- *
- * @returns {node-fetch}
- */
-exports.getWebdav = function (url, params, userId, header) {
-  const options = { ...params, method: 'GET' }
-  return this.requestWebdavEndpoint(url, options, userId, header)
-}
-
-/**
- *
- * @param {string} url
- * @param {object} params
- * @param {string} userId
- * @param {object} header
- *
- * @returns {node-fetch}
- */
-exports.deleteWebdav = function (url, params, userId, header) {
-  const options = { ...params, method: 'DELETE' }
-  return this.requestWebdavEndpoint(url, options, userId, header)
-}
-
-/**
- *
- * @param {string} url
- * @param {object} params
- * @param {string} userId
- * @param {object} header
- *
- * @returns {node-fetch}
- */
-exports.moveWebdav = function (url, params, userId, header) {
-  const options = { ...params, method: 'MOVE' }
-  return this.requestWebdavEndpoint(url, options, userId, header)
-}
-
-/**
- *
- * @param {string} url
- * @param {object} params
- * @param {string} userId
- * @param {object} header
- *
- * @returns {node-fetch}
- */
-exports.propfindWebdav = function (url, params, userId, header) {
-  const options = { ...params, method: 'PROPFIND' }
-  return this.requestWebdavEndpoint(url, options, userId, header)
-}
-
-/**
- *
- * @param {string} url
- * @param {object} params
- * @param {string} userId
- * @param {object} header
- *
- * @returns {node-fetch}
- */
-exports.reportWebdav = function (url, params, userId, header) {
-  const options = { ...params, method: 'REPORT' }
-  return this.requestWebdavEndpoint(url, options, userId, header)
-}
-
-/**
- *
- * @param {string} url
- * @param {object} params
- * @param {string} userId
- * @param {object} header
- *
- * @returns {node-fetch}
- */
-exports.putWebdav = function (url, params, userId, header) {
-  const options = { ...params, method: 'PUT' }
-  return this.requestWebdavEndpoint(url, options, userId, header)
-}
-
-/**
- *
- * @param {string} url
- * @param {object} params
- * @param {string} userId
- * @param {object} header
- *
- * @returns {node-fetch}
- */
-exports.propPatchWebdav = function (url, params, userId, header) {
-  const options = { ...params, method: 'PROPPATCH' }
-  return this.requestWebdavEndpoint(url, options, userId, header)
-}
-
-/**
- *
- * @param {string} url
- * @param {object} params
- * @param {string} userId
- * @param {object} header
- *
- * @returns {node-fetch}
- */
-exports.requestEndpoint = function (url, params, userId = 'admin', header = {}) {
-  const headers = { ...this.createOCSRequestHeaders(userId), ...header }
-  const options = { ...params, headers }
-  return fetch(url, options)
+  return this.requestEndpoint(url, options, userId, header)
 }
 
 /**
@@ -225,8 +112,50 @@ exports.get = function (url, params, userId, header) {
  *
  * @returns {node-fetch}
  */
-exports.post = function (url, params, userId, header) {
-  const options = { ...params, method: 'POST' }
+exports.delete = function (url, params, userId, header) {
+  const options = { ...params, method: 'DELETE' }
+  return this.requestEndpoint(url, options, userId, header)
+}
+
+/**
+ *
+ * @param {string} url
+ * @param {object} params
+ * @param {string} userId
+ * @param {object} header
+ *
+ * @returns {node-fetch}
+ */
+exports.move = function (url, params, userId, header) {
+  const options = { ...params, method: 'MOVE' }
+  return this.requestEndpoint(url, options, userId, header)
+}
+
+/**
+ *
+ * @param {string} url
+ * @param {object} params
+ * @param {string} userId
+ * @param {object} header
+ *
+ * @returns {node-fetch}
+ */
+exports.propfind = function (url, params, userId, header) {
+  const options = { ...params, method: 'PROPFIND' }
+  return this.requestEndpoint(url, options, userId, header)
+}
+
+/**
+ *
+ * @param {string} url
+ * @param {object} params
+ * @param {string} userId
+ * @param {object} header
+ *
+ * @returns {node-fetch}
+ */
+exports.report = function (url, params, userId, header) {
+  const options = { ...params, method: 'REPORT' }
   return this.requestEndpoint(url, options, userId, header)
 }
 
@@ -253,7 +182,78 @@ exports.put = function (url, params, userId, header) {
  *
  * @returns {node-fetch}
  */
-exports.delete = function (url, params, userId, header) {
-  const options = { ...params, method: 'DELETE' }
+exports.proppatch = function (url, params, userId, header) {
+  const options = { ...params, method: 'PROPPATCH' }
   return this.requestEndpoint(url, options, userId, header)
+}
+
+/**
+ *
+ * @param {string} url
+ * @param {object} params
+ * @param {string} userId
+ * @param {object} header
+ *
+ * @returns {node-fetch}
+ */
+exports.requestOCSEndpoint = function (url, params, userId = 'admin', header = {}) {
+  const headers = { ...this.createOCSRequestHeaders(userId), ...header }
+  const options = { ...params, headers }
+  return fetch(url, options)
+}
+
+/**
+ *
+ * @param {string} url
+ * @param {object} params
+ * @param {string} userId
+ * @param {object} header
+ *
+ * @returns {node-fetch}
+ */
+exports.getOCS = function (url, params, userId, header) {
+  const options = { ...params, method: 'GET' }
+  return this.requestOCSEndpoint(url, options, userId, header)
+}
+
+/**
+ *
+ * @param {string} url
+ * @param {object} params
+ * @param {string} userId
+ * @param {object} header
+ *
+ * @returns {node-fetch}
+ */
+exports.postOCS = function (url, params, userId, header) {
+  const options = { ...params, method: 'POST' }
+  return this.requestOCSEndpoint(url, options, userId, header)
+}
+
+/**
+ *
+ * @param {string} url
+ * @param {object} params
+ * @param {string} userId
+ * @param {object} header
+ *
+ * @returns {node-fetch}
+ */
+exports.putOCS = function (url, params, userId, header) {
+  const options = { ...params, method: 'PUT' }
+  return this.requestOCSEndpoint(url, options, userId, header)
+}
+
+/**
+ *
+ * @param {string} url
+ * @param {object} params
+ * @param {string} userId
+ * @param {object} header
+ *
+ * @returns {node-fetch}
+ */
+exports.deleteOCS = function (url, params, userId, header) {
+  const options = { ...params, method: 'DELETE' }
+  return this.requestOCSEndpoint(url, options, userId, header)
 }

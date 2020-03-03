@@ -11,7 +11,7 @@ exports.runOcc = function (args) {
   const params = new URLSearchParams()
   params.append('command', args.join(' '))
   const apiURL = join(backendHelper.getCurrentBackendUrl(), '/ocs/v2.php/apps/testing/api/v1/occ?format=json')
-  return httpHelper.post(apiURL, { body: params })
+  return httpHelper.postOCS(apiURL, { body: params })
     .then(res => {
       httpHelper.checkStatus(res, 'Failed while executing occ command')
       return res.json()

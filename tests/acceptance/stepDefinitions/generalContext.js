@@ -140,7 +140,7 @@ const setTrustedServer = function (url) {
   const body = new URLSearchParams()
   body.append('url', url)
   const postUrl = join(backendHelper.getCurrentBackendUrl(), '/ocs/v2.php/apps/testing/api/v1/trustedservers?format=json')
-  return httpHelper.post(postUrl, { body })
+  return httpHelper.postOCS(postUrl, { body })
     .then(res => {
       return httpHelper.checkStatus(res)
     })
@@ -182,7 +182,7 @@ After(async function (testCase) {
   const body = new URLSearchParams()
   body.append('global', 'true')
   const url = join(client.globals.backend_url, '/ocs/v2.php/apps/testing/api/v1/lockprovisioning')
-  await httpHelper.delete(url, { body })
+  await httpHelper.deleteOCS(url, { body })
 })
 
 Before(function () {

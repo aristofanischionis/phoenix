@@ -117,7 +117,7 @@ const shareFileFolder = function (
     backendHelper.getCurrentBackendUrl(),
     '/ocs/v2.php/apps/files_sharing/api/v1/shares?format=json'
   )
-  return httpHelper.post(url, { body: params }, sharer)
+  return httpHelper.postOCS(url, { body: params }, sharer)
     .then(res => res.json())
     .then(function (json) {
       httpHelper.checkOCSStatus(json, 'Could not create share. Message: ' + json.ocs.meta.message)
