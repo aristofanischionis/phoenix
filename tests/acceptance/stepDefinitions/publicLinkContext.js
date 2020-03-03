@@ -5,19 +5,16 @@ const sharingHelper = require('../helpers/sharingHelper')
 const assert = require('assert')
 const { SHARE_TYPES } = require('../helpers/sharingHelper')
 const path = require('../helpers/path')
-const filesList = client.page.FilesPageElement.filesList()
 
 When(
   'the user (tries to )create/creates a new public link for file/folder/resource {string} using the webUI',
   async function (resource) {
-    await filesList.waitForFileVisible(resource)
     await client.page.FilesPageElement
       .appSideBar()
       .closeSidebar(100)
-      .openFileActionsMenu(resource)
-      .openLinksDialog()
+      .openPublicLinkDialog(resource)
+    return client.page.FilesPageElement.publicLinksDialog()
       .addNewLink()
-    return client
   }
 )
 
@@ -25,14 +22,11 @@ When(
   'the user (tries to )create/creates a new public link for file/folder/resource {string} using the webUI with',
   async function (resource, settingsTable) {
     const settings = settingsTable.rowsHash()
-    await filesList.waitForFileVisible(resource)
     await client.page.FilesPageElement
       .appSideBar()
       .closeSidebar(100)
-      .openFileActionsMenu(resource)
-      .openLinksDialog()
-      .addNewLink(settings)
-    return client
+      .openPublicLinkDialog(resource)
+    return client.page.FilesPageElement.publicLinksDialog().addNewLink(settings)
   }
 )
 
@@ -108,31 +102,40 @@ Then('the public should not get access to the publicly shared file', async funct
 When('the user edits the public link named {string} of file/folder/resource {string} changing following but not saving',
   async function (linkName, resource, dataTable) {
     const editData = dataTable.rowsHash()
-    await filesList.waitForFileVisible(resource)
-    return filesList
-      .openFileActionsMenu(resource)
-      .openLinksDialog()
+    await client.page.FilesPageElement
+      .appSideBar()
+      .closeSidebar(100)
+      .openPublicLinkDialog(resource)
+    return client.page.FilesPageElement
+      .publicLinksDialog()
       .editPublicLink(linkName, editData)
   })
 
 When('the user edits the public link named {string} of file/folder/resource {string} changing following',
   async function (linkName, resource, dataTable) {
     const editData = dataTable.rowsHash()
-    await filesList.waitForFileVisible(resource)
-    return filesList
-      .openFileActionsMenu(resource)
-      .openLinksDialog()
+    await client.page.FilesPageElement
+      .appSideBar()
+      .closeSidebar(100)
+      .openPublicLinkDialog(resource)
+    await client.page.FilesPageElement
+      .publicLinksDialog()
       .editPublicLink(linkName, editData)
+    return client.page.FilesPageElement
+      .publicLinksDialog()
       .savePublicLink()
   })
 
 When('the user tries to edit expiration of the public link named {string} of file {string} to past date {string}',
   async function (linkName, resource, pastDate) {
-    await filesList.waitForFileVisible(resource)
-    const isDisabled = await filesList
-      .openFileActionsMenu(resource)
-      .openLinksDialog()
-      .isExpiryDateDisabled(linkName, pastDate)
+    await client.page.FilesPageElement
+      .appSideBar()
+      .closeSidebar(100)
+      .openPublicLinkDialog(resource)
+    await client.page.FilesPageElement.publicLinksDialog().clickLinkEditBtn(linkName)
+    const isDisabled = await client.page.FilesPageElement
+      .publicLinksDatePicker()
+      .isExpiryDateDisabled(pastDate)
     return assert.ok(
       isDisabled,
       'Expected expiration date to be disabled but found not disabled'
@@ -141,10 +144,12 @@ When('the user tries to edit expiration of the public link named {string} of fil
 
 When('the user removes the public link named {string} of file/folder/resource {string} using the webUI',
   async function (linkName, resource) {
-    await filesList.waitForFileVisible(resource)
-    return filesList
-      .openFileActionsMenu(resource)
-      .openLinksDialog()
+    await client.page
+      .FilesPageElement
+      .appSideBar()
+      .closeSidebar(100)
+      .openPublicLinkDialog(resource)
+    return client.page.FilesPageElement.publicLinksDialog()
       .removePublicLink(linkName)
   })
 
@@ -163,10 +168,10 @@ async function findMatchingPublicLinkByName (name, role, resource, via = null) {
   await client.page.FilesPageElement
     .appSideBar()
     .closeSidebar(100)
-  await filesList.waitForFileVisible(resource)
-  const shares = await filesList
-    .openFileActionsMenu(resource)
-    .openLinksDialog()
+    .openPublicLinkDialog(resource)
+
+  const shares = await client.page.FilesPageElement
+    .publicLinksDialog()
     .getPublicLinkList()
 
   const share = shares.find(link => link.name === name)
@@ -212,10 +217,11 @@ When('the user closes the public link details sidebar', function () {
 
 When('the user copies the url of public link named {string} of file/folder/resource {string} using the webUI',
   async function (linkName, resource) {
-    await filesList.waitForFileVisible(resource)
-    return filesList
-      .openFileActionsMenu(resource)
-      .openLinksDialog()
+    await client.page.FilesPageElement
+      .appSideBar()
+      .closeSidebar(100)
+      .openPublicLinkDialog(resource)
+    return client.page.FilesPageElement.publicLinksDialog()
       .copyPublicLinkURI(linkName)
   })
 

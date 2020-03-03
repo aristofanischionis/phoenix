@@ -27,13 +27,30 @@ module.exports = {
         .openCollaboratorsDialog()
     },
     /**
+     * opens links dialog for given resource
+     * assumes fileActionsMenu to be opened, as the its moves to links tab from file-actions share option
+     *
+     * @return {*}
+     */
+    openLinksDialog: function () {
+      const api = this.api.page.FilesPageElement
+      const sidebarLinksTabXpath = api.appSideBar().elements.sidebarLinksTab.selector
+      api.fileActionsMenu()
+        .openCollaboratorsDialog()
+        .useXpath()
+        .waitForElementVisible(sidebarLinksTabXpath)
+        .click(sidebarLinksTabXpath)
+        .useCss()
+      return api.publicLinksDialog()
+    },
+    /**
      * @param {string} fileName
      * @return {Promise<*>}
      */
-    openPublicLinksDialog: async function (fileName) {
+    openPublicLinkDialog: async function (fileName) {
       await this.waitForFileVisible(fileName)
-      return this.openFileActionsMenu(fileName)
-        .openLinksDialog()
+      await this.openFileActionsMenu(fileName)
+      return this.openLinksDialog()
     },
     /**
      * @param {string} resource
@@ -202,10 +219,12 @@ module.exports = {
       return this.api.page.FilesPageElement.appSideBar()
     },
     /**
+     * opens file-actions menu for given resource
+     *
      * @param {string} resource name
      * @param {string} resource type (file|folder)
      *
-     * @return
+     * @returns {*}
      */
     openFileActionsMenu: function (resource, elementType = 'file') {
       const fileActionsBtnSelector = this.getFileActionBtnSelector(resource, elementType)
@@ -331,32 +350,17 @@ module.exports = {
      */
     waitForFileVisible: async function (fileName, elementType = 'file') {
       const linkSelector = this.getFileLinkSelectorByFileName(fileName, elementType)
-      await this
-        .waitForElementPresent('@filesTableContainer')
-        // Find the item in files list if it's not in the view
-        .filesListScrollToTop()
+
+      await this.waitForElementPresent('@filesTableContainer')
+      await this.filesListScrollToTop()
+      // Find the item in files list if it's not in the view
       await this.findItemInFilesList(fileName)
       await this
-        .waitForAnimationToFinish()
         .useXpath()
-        .waitForElementVisible({
-          selector: linkSelector,
-          abortOnFailure: false
-        }, (result) => {
-          if (result.status !== 0) {
-            console.log('WARNING: Resource is not located yet, Retrying...')
-            this
-              .pause(2000)
-              .waitForElementVisible(linkSelector)
+        .getAttribute(linkSelector, 'filename', function (result) {
+          if (result.value.error) {
+            this.assert.fail(result.value.error)
           }
-        })
-        .api.execute((selector) => {
-          const el = document.evaluate(
-            selector, document, null,
-            XPathResult.FIRST_ORDERED_NODE_TYPE, null
-          ).singleNodeValue
-          return el.getAttribute('filename')
-        }, [linkSelector], (result) => {
           this.assert.strictEqual(result.value, fileName, 'displayed file name not as expected')
         })
         .useCss()
@@ -711,7 +715,7 @@ module.exports = {
       selector: '//span[span/text()=%s and span/text()="%s"]/../../../../div[@data-is-visible="true"]'
     },
     fileLinkInFileRow: {
-      selector: '//span[@role="button"]'
+      selector: '//span[contains(@class, "file-row-name")]'
     },
     notMarkedFavoriteInFileRow: {
       selector: '//span[contains(@class, "oc-star-dimm")]',

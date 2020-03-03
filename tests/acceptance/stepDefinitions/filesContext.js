@@ -160,7 +160,7 @@ When('the user creates a folder with the invalid name {string} using the webUI',
 Given('the user has opened folder {string}', (folder) => client.page.FilesPageElement.filesList().navigateToFolder(folder))
 When('the user opens folder {string} using the webUI', (folder) => client.page.FilesPageElement.filesList().navigateToFolder(folder))
 
-Given('the user has opened the share dialog for file/folder {string}', async function (fileName) {
+Given('the user has opened the share dialog for file/folder {string}', function (fileName) {
   return client.page.FilesPageElement
     .appSideBar()
     .closeSidebar(100)

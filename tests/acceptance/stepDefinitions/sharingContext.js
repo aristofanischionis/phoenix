@@ -29,13 +29,12 @@ const userSharesFileOrFolderWithUserOrGroup = async function (
   const api = client.page
     .FilesPageElement
 
-  await api.appSideBar().closeSidebar(100)
-  await api.filesList().waitForFileVisible(file)
-  return api
-    .filesList()
-    .openFileActionsMenu(file)
-    .openCollaboratorsDialog()
-    .shareWithUserOrGroup(sharee, shareWithGroup, role, permissions, remote)
+  await api
+    .appSideBar()
+    .closeSidebar(100)
+    .openSharingDialog(file)
+
+  return api.sharingDialog().shareWithUserOrGroup(sharee, shareWithGroup, role, permissions, remote)
 }
 
 /**
@@ -522,12 +521,8 @@ Then('custom permission/permissions {string} should be set for user {string} for
       .FilesPageElement
       .appSideBar()
       .closeSidebar(100)
-      .waitForFileVisible(resource)
-    const currentSharePermissions = await client.page
-      .FilesPageElement
-      .filesList()
-      .openFileActionsMenu(resource)
-      .openCollaboratorsDialog()
+      .openSharingDialog(resource)
+    const currentSharePermissions = await client.page.FilesPageElement.sharingDialog()
       .getDisplayedPermission(user)
 
     return assertSharePermissions(currentSharePermissions, permissions)
@@ -538,12 +533,8 @@ Then('no custom permissions should be set for collaborator {string} for file/fol
     .FilesPageElement
     .appSideBar()
     .closeSidebar(100)
-    .waitForFileVisible(resource)
-  const currentSharePermissions = await client.page
-    .FilesPageElement
-    .filesList()
-    .openFileActionsMenu(resource)
-    .openCollaboratorsDialog()
+    .openSharingDialog(resource)
+  const currentSharePermissions = await client.page.FilesPageElement.sharingDialog()
     .getDisplayedPermission(user)
   return assertSharePermissions(currentSharePermissions)
 })
@@ -707,7 +698,7 @@ When('the user opens the share dialog for file/folder/resource {string} using th
 })
 
 When('the user opens the link share dialog for file/folder/resource {string} using the webUI', function (file) {
-  return client.page.FilesPageElement.filesList().openPublicLinksDialog(file)
+  return client.page.FilesPageElement.filesList().openPublicLinkDialog(file)
 })
 
 When('the user deletes {string} as collaborator for the current file/folder using the webUI', function (user) {
@@ -843,6 +834,7 @@ Then('the collaborators list for file/folder/resource {string} should be empty',
     .appSideBar()
     .closeSidebar(100)
     .openSharingDialog(resource)
+
   const count = (await api
     .SharingDialog.collaboratorsDialog()
     .getCollaboratorsList({})

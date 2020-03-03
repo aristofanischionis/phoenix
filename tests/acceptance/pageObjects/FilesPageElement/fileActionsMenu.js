@@ -106,23 +106,6 @@ module.exports = {
       return api.sharingDialog()
     },
     /**
-     * opens links dialog for given resource
-     * assumes fileActionsMenu to be opened, as the its moves to links tab from file-actions share option
-     *
-     * @return {*}
-     */
-    openLinksDialog: function () {
-      const api = this.api.page.FilesPageElement
-      const sidebarLinksTabXpath = api.appSideBar().elements.sidebarLinksTab.selector
-      this
-        .openCollaboratorsDialog()
-        .useXpath()
-        .waitForElementVisible(sidebarLinksTabXpath)
-        .click(sidebarLinksTabXpath)
-        .useCss()
-      return api.publicLinksDialog()
-    },
-    /**
      * checks whether sharing button of given file-row is present
      *
      * @returns {Promise<boolean>}
