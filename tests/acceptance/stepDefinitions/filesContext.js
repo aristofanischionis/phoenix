@@ -790,7 +790,7 @@ When('the user copies the permalink of the file/folder/resource {string} using t
   await client.page.FilesPageElement
     .appSideBar()
     .closeSidebar(100)
-    .openPublicLinksDialog(file)
+    .openPublicLinkDialog(file)
   await client.page.filesPage().copyPermalinkFromFilesAppBar()
   return client
 })
