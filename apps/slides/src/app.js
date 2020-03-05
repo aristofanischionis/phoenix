@@ -15,7 +15,7 @@ const routes = [{
 const appInfo = {
   name: 'Slides',
   id: 'slides',
-  icon: 'text',
+  icon: 'text', // change to a meaningful icon
   extensions: [{
     extension: 'slides',
     newTab: true,
