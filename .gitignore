@@ -9,6 +9,7 @@ apps/*
 !apps/markdown-editor
 !apps/media-viewer
 !apps/pdf-viewer
+!apps/slides
 
 build/version.json
 

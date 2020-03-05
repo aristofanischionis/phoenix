@@ -58,6 +58,7 @@ l10n-push:
 	cd apps/markdown-editor/l10n && tx -d push -s --no-interactive
 	cd apps/pdf-viewer/l10n && tx -d push -s --no-interactive
 	cd apps/media-viewer/l10n && tx -d push -s --no-interactive
+	cd apps/slides/l10n && tx -d push -s --no-interactive
 
 .PHONY: l10n-pull
 l10n-pull:
@@ -66,6 +67,7 @@ l10n-pull:
 	cd apps/markdown-editor/l10n && tx -d pull -a
 	cd apps/pdf-viewer/l10n && tx -d pull -a
 	cd apps/media-viewer/l10n && tx -d pull -a
+	cd apps/slides/l10n && tx -d pull -a
 
 .PHONY: l10n-clean
 l10n-clean:
