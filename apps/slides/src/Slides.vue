@@ -2,14 +2,29 @@
   <iframe id="slides" ref="slides" :src="iframeSource"></iframe>
 </template>
 <script>
+
 import { mapGetters, mapActions } from 'vuex'
-// import queryString from 'query-string'
+import Store from '../../../src/store'
+import queryString from 'query-string'
+import axios from 'axios'
+
+// example for my Slides app:
+// Integration just have to find the token and inode and send them as parameters to slides
+/* getFileInfo
+http://localhost:8443/wopi/files/--inode--?access_token=--token--
+*/
+/* getFileContents
+http://localhost:8443/wopi/files/--inode--/contents?access_token=--token--
+*/
 
 export default {
   name: 'Slides',
   data: () => ({
     filePath: '',
-    currentETag: null
+    accessToken: '', // access token which should be given as params, with name --> access_token
+    inode: '', // number indicating the file
+    username: '',
+    response: ''
   }),
   computed: {
     ...mapGetters(['getToken']),
@@ -17,39 +32,24 @@ export default {
       return this.content === ''
     },
     iframeSource () {
-      // const query = queryString.stringify({
-      //   // embed: 1,
-      //   // picker: 0,
-      //   // stealth: 1,
-      //   // spin: 1,
-      //   // proto: 'json',
-      //   // ui: 'minimal'
-      //   // username:,
-      // })
-
+      const query = queryString.stringify({
+        username: this.username,
+        wopiSrc: this.wopiSrc,
+        accessToken: this.accessToken
+      })
       // return 'https://slides.web.cern.ch?' + query
-      return 'http://localhost:3000' // how can i get the username ?
+      // first OPEN in WOPI, get a token and pass it as parameter and username in SLIDES
+      // export that to function
+
+      // GET GETFILEINFO GETFILE LOCK file in the Slides side
+      // PUTFILE UNLOCK file Slides side
+      // notifications in SLIDES side
+      // then forget about it
+      return 'http://localhost:3000'
     }
   },
-  created () {
-    this.filePath = this.$route.params.filePath
-
-    window.addEventListener('message', event => {
-      console.log('Phoenix event is', event)
-      // if (event.origin !== 'http://localhost:3000') return // maybe in the future we can enable this for more security
-      // if (event.data.length > 0) {
-      // const payload = JSON.parse(event.data)
-      const _event = event.data.get('event')
-      const payload = event.data.get('slidesFile')
-      if (_event === 'init') {
-        this.load()
-      } else if (_event === 'save') {
-        this.save(payload)
-      } else if (_event === 'exit') {
-        this.exit()
-      }
-      // }
-    })
+  mounted () {
+    this.openWOPI()
   },
   methods: {
     ...mapActions(['showMessage']),
@@ -60,38 +60,26 @@ export default {
         status: 'danger'
       })
     },
-
-    load () {
-      this.$client.files.getFileContents(this.filePath, { resolveWithResponseObject: true })
-        .then(resp => {
-          this.currentETag = resp.headers.ETag
-          this.$refs.slides.contentWindow.postMessage(JSON.stringify({
-            action: 'load',
-            slidesFile: resp.body
-          }), '*')
+    openWOPI: function () {
+      axios
+        .get('http://localhost:8443/wopi/cbox/open', {
+          params: {
+            ruid: 1,
+            rgid: 1,
+            canedit: true,
+            username: Store.state.user.id,
+            filename: this.$route.params.filePath,
+            folderurl: '/'
+          }
+        }).then(response => {
+          console.log('response________', response)
+          // should get the wopisrc and the accesstoken
+          this.response = response
+        }).catch(e => {
+          console.log('errorrrrrrrrrrrrrr', e)
+          this.response = null
+          this.error(e)
         })
-        .catch(error => {
-          this.error(error)
-        })
-    },
-    save (payload) {
-      console.log('im in save with payload', payload)
-      // i have to fix it how to save it, i got the state but i need the pictures as well and then also how to save it
-      this.$client.files.putFileContents(this.filePath, payload, {
-        previousEntityTag: this.currentETag, contentType: 'multipart/form-data; boundary='
-      }).then((resp) => {
-        console.log('eimai sthn save success')
-        this.$refs.slides.contentWindow.postMessage(JSON.stringify({
-          action: 'Successfully Saved'
-        }), '*')
-        this.currentETag = resp.ETag
-      }).catch(error => {
-        console.log('eimai sthn save error')
-        this.error(error)
-      })
-    },
-    exit () {
-      window.close()
     }
   }
 }
@@ -111,5 +99,4 @@ export default {
   overflow: hidden;
   z-index: 999999;
 }
-
 </style>
