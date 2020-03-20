@@ -23,8 +23,7 @@ export default {
     filePath: '',
     accessToken: '', // access token which should be given as params, with name --> access_token
     inode: '', // number indicating the file
-    username: '',
-    response: ''
+    username: ''
   }),
   computed: {
     ...mapGetters(['getToken']),
@@ -34,7 +33,7 @@ export default {
     iframeSource () {
       const query = queryString.stringify({
         username: this.username,
-        wopiSrc: this.wopiSrc,
+        inode: this.inode,
         accessToken: this.accessToken
       })
       // return 'https://slides.web.cern.ch?' + query
@@ -45,7 +44,8 @@ export default {
       // PUTFILE UNLOCK file Slides side
       // notifications in SLIDES side
       // then forget about it
-      return 'http://localhost:3000'
+      console.log('the link is', 'http://localhost:3000?' + query)
+      return 'http://localhost:3000?' + query
     }
   },
   mounted () {
@@ -72,12 +72,13 @@ export default {
             folderurl: '/'
           }
         }).then(response => {
-          console.log('response________', response)
-          // should get the wopisrc and the accesstoken
-          this.response = response
+          const { data } = response
+          const dataObj = queryString.parse(data)
+          // get the info from the url response
+          this.accessToken = dataObj.access_token
+          this.inode = Object.keys(dataObj)[1].split('/files/').pop()
+          this.username = Store.state.user.id
         }).catch(e => {
-          console.log('errorrrrrrrrrrrrrr', e)
-          this.response = null
           this.error(e)
         })
     }
